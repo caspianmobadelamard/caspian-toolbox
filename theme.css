@@ -1,0 +1,41 @@
+/* ============================================================================
+   CASPIAN ENGINEERING TOOLBOX — Shared Neon Design System
+   رنگ‌بندی نئونی الگو گرفته از index.html مرجع (دفتر سریال کاسپین)
+   لایه‌ها:
+     1) متغیرهای کاربری --u-*  (توسط bridge.js بر اساس تنظیمات کاربر ست می‌شوند)
+     2) توکن‌های نئونی مرجع (--bg-*, --gold, --cyan, ...) که از --u-* تغذیه می‌شوند
+     3) هر ماژول توکن‌های خودش را به این توکن‌ها Remap می‌کند
+   ============================================================================ */
+:root {
+  /* ---------- ۱) متغیرهای کاربری (پیش‌فرض = تم تیره نئونی) ---------- */
+  --u-bg-base:#1e2a3a; --u-bg-surface:#27374a; --u-bg-elevated:#2f4257; --u-bg-input:#1a2332; --u-bg-hover:#324a63;
+  --u-border:#3a4d63; --u-border-strong:#4d6383; --u-border-dashed:#435a75;
+  --u-text:#e8eef5; --u-text-mid:#a5b5c5; --u-text-dim:#738599;
+  --u-accent:#fbbf24; --u-accent-dim:#d97706; --u-accent-light:#fcd34d; --u-accent-glow:rgba(251,191,36,.35);
+
+  /* ---------- ۲) توکن‌های نئونی مرجع ---------- */
+  --bg-base:var(--u-bg-base); --bg-surface:var(--u-bg-surface); --bg-elevated:var(--u-bg-elevated);
+  --bg-input:var(--u-bg-input); --bg-hover:var(--u-bg-hover);
+  --border:var(--u-border); --border-strong:var(--u-border-strong); --border-dashed:var(--u-border-dashed);
+  --text:var(--u-text); --text-mid:var(--u-text-mid); --text-dim:var(--u-text-dim);
+
+  --gold:var(--u-accent); --gold-dim:var(--u-accent-dim); --gold-glow:var(--u-accent-glow);
+  --cyan:#38bdf8; --cyan-dim:#0284c7; --cyan-glow:rgba(56,189,248,.35);
+  --purple:#a78bfa; --purple-dim:#7c3aed; --purple-glow:rgba(167,139,250,.35);
+  --coral:#fb7185; --coral-dim:#e11d48; --coral-glow:rgba(251,113,133,.35);
+  --mint:#4ade80; --mint-dim:#16a34a; --mint-glow:rgba(74,222,128,.35);
+  --amber:#fcd34d; --danger:#f87171;
+
+  --radius:12px; --radius-sm:8px;
+  --shadow:0 4px 16px rgba(0,0,0,.35); --shadow-hover:0 6px 24px rgba(0,0,0,.5);
+  --c1:#38bdf8; --c2:#4ade80; --c3:#fbbf24; --c4:#a78bfa; --c5:#fb7185; --c6:#22d3ee; --c7:#fcd34d; --c8:#f87171;
+  --base-font:15px; --num-font-size:1.15em;
+}
+
+/* ---------- تم روشن (پیش‌فرض در صورت نبود JS) ---------- */
+html[data-caspian-theme="light"] {
+  --u-bg-base:#f0f4f8; --u-bg-surface:#ffffff; --u-bg-elevated:#e8eef5; --u-bg-input:#ffffff; --u-bg-hover:#dbe4ee;
+  --u-border:#d0d8e0; --u-border-strong:#a8b4c4; --u-border-dashed:#c0ccd8;
+  --u-text:#1a2332; --u-text-mid:#4a5568; --u-text-dim:#7a8699;
+  --shadow:0 2px 8px rgba(0,0,0,.08); --shadow-hover:0 4px 16px rgba(0,0,0,.12);
+}

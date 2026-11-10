@@ -1,0 +1,20 @@
+{
+  "name": "Caspian Engineering Toolbox — کاسپین مبدل آمارد",
+  "short_name": "Caspian Toolbox",
+  "description": "جعبه‌ابزار مهندسی کاسپین مبدل آمارد: دستیار تعیین ظرفیت تأسیسات + محاسبه‌گر مخزن تحت فشار",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1e2a3a",
+  "theme_color": "#1e2a3a",
+  "categories": ["productivity", "utilities", "engineering", "business"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

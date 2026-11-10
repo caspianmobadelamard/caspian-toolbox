@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1e2a3a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Caspian Toolbox">
+<title>Caspian Engineering Toolbox — کاسپین مبدل آمارد</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="lib/vazirmatn.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:'Vazirmatn','Tahoma',sans-serif;font-size:var(--base-font);line-height:1.6;
+    background:var(--bg-base);color:var(--text);overflow:hidden;
+    background-image:linear-gradient(rgba(251,191,36,.025) 1px, transparent 1px),linear-gradient(90deg, rgba(251,191,36,.025) 1px, transparent 1px);
+    background-size:28px 28px;
+    display:flex;flex-direction:column;height:100vh;height:100dvh;
+    transition:background .3s,color .3s;
+  }
+
+  /* ===== نوار بالا ===== */
+  .topbar{
+    flex:0 0 auto;position:relative;z-index:50;
+    background:linear-gradient(180deg,var(--bg-surface),var(--bg-base));
+    border-bottom:2px solid var(--border-strong);
+    box-shadow:0 2px 0 var(--gold-glow),var(--shadow);
+    padding-top:env(safe-area-inset-top);
+  }
+  .topbar::after{content:'';position:absolute;bottom:-2px;left:20px;right:20px;height:2px;
+    background:linear-gradient(90deg,var(--gold),var(--cyan),var(--purple),var(--coral));border-radius:0 0 3px 3px;}
+  .topbar-inner{display:flex;align-items:center;gap:12px;padding:10px 14px 8px;max-width:1600px;margin:0 auto;width:100%;}
+  .brand{display:flex;align-items:center;gap:11px;flex:1;min-width:0;}
+  .brand-mark{width:44px;height:44px;flex:0 0 44px;border-radius:12px;background:var(--bg-input);
+    display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;border:2px solid var(--gold);
+    box-shadow:0 0 14px var(--gold-glow);}
+  .brand-mark svg{width:30px;height:30px;position:relative;z-index:2;}
+  .brand-text{flex:1;min-width:0;}
+  .brand-text h1{font-size:1.02em;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;}
+  .brand-text .sub{font-size:.68em;color:var(--text-dim);font-family:'JetBrains Mono',monospace;letter-spacing:.5px;direction:ltr;text-align:right;}
+  .top-actions{display:flex;gap:6px;flex:0 0 auto;align-items:center;}
+  .icon-btn{width:40px;height:40px;border-radius:10px;background:var(--bg-elevated);border:1px solid var(--border);
+    color:var(--text-mid);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;}
+  .icon-btn:hover{color:var(--gold);border-color:var(--gold);box-shadow:0 0 10px var(--gold-glow);}
+  .icon-btn:active{transform:scale(.92);}
+  .icon-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .icon-btn .dot{position:absolute;transform:translate(13px,-13px);width:9px;height:9px;border-radius:50%;background:var(--coral);border:2px solid var(--bg-surface);display:none;}
+  .icon-btn.has-dot .dot{display:block;}
+
+  /* ===== تب ماژول‌ها ===== */
+  .module-tabs{display:flex;gap:6px;padding:0 14px 10px;overflow-x:auto;scrollbar-width:none;max-width:1600px;margin:0 auto;width:100%;}
+  .module-tabs::-webkit-scrollbar{display:none;}
+  .module-tab{flex:1;min-width:150px;display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:11px 12px;border-radius:11px;border:1.5px solid var(--border);background:var(--bg-elevated);
+    color:var(--text-mid);font-family:inherit;font-size:.9em;font-weight:800;cursor:pointer;transition:all .2s;white-space:nowrap;}
+  .module-tab .ic{font-size:1.15em;}
+  .module-tab:hover{border-color:var(--border-strong);color:var(--text);}
+  .module-tab.active{
+    background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:#1a1205;border-color:var(--gold);
+    box-shadow:0 0 18px var(--gold-glow);}
+
+  /* ===== بدنه / iframe ===== */
+  .shell-main{flex:1 1 auto;position:relative;min-height:0;}
+  .frame{position:absolute;inset:0;width:100%;height:100%;border:none;background:var(--bg-base);}
+  .frame[hidden]{display:none;}
+
+  /* ===== بنر به‌روزرسانی ===== */
+  .update-banner{display:none;align-items:center;gap:10px;margin:10px 14px 0;padding:11px 14px;
+    background:linear-gradient(135deg,rgba(56,189,248,.18),rgba(56,189,248,.04));
+    border:1px solid var(--cyan);border-right:4px solid var(--cyan);border-radius:var(--radius);
+    font-size:.85em;color:var(--text);}
+  .update-banner.show{display:flex;}
+  .update-banner .txt{flex:1;}
+  .update-banner .txt strong{color:var(--cyan);}
+  .update-banner button{background:linear-gradient(135deg,var(--cyan),var(--cyan-dim));color:#04121a;border:none;
+    padding:7px 14px;border-radius:8px;font-family:inherit;font-weight:800;cursor:pointer;font-size:.85em;}
+
+  /* ===== پنل تنظیمات ===== */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;display:none;align-items:flex-end;backdrop-filter:blur(3px);}
+  .overlay.show{display:flex;}
+  .settings{width:100%;max-width:640px;margin:0 auto;background:var(--bg-surface);border:1px solid var(--border-strong);
+    border-radius:20px 20px 0 0;padding:20px;padding-bottom:calc(20px + env(safe-area-inset-bottom));
+    max-height:88vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.5);}
+  .settings h2{display:flex;align-items:center;justify-content:space-between;color:var(--gold);font-size:1.05em;font-weight:800;margin-bottom:4px;}
+  .settings .close{background:none;border:none;color:var(--text-dim);font-size:1.4em;cursor:pointer;line-height:1;}
+  .settings .sub{color:var(--text-dim);font-size:.82em;margin-bottom:16px;}
+  .set-group{margin-bottom:18px;}
+  .set-group h3{font-size:.8em;color:var(--text-mid);font-weight:800;margin-bottom:9px;display:flex;align-items:center;gap:7px;text-transform:uppercase;letter-spacing:.4px;}
+  .swatches{display:flex;flex-wrap:wrap;gap:8px;}
+  .swatch{width:40px;height:40px;border-radius:11px;border:2px solid transparent;cursor:pointer;position:relative;transition:all .15s;}
+  .swatch:hover{transform:scale(1.08);}
+  .swatch.active{border-color:var(--text);box-shadow:0 0 0 2px var(--gold),0 0 16px var(--gold-glow);}
+  .swatch.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#0a0a0a;font-weight:900;}
+  .seg{display:flex;gap:6px;flex-wrap:wrap;}
+  .seg-btn{flex:1;min-width:72px;padding:10px 8px;border-radius:9px;border:1.5px solid var(--border);background:var(--bg-elevated);
+    color:var(--text-mid);font-family:inherit;font-size:.82em;font-weight:800;cursor:pointer;transition:all .15s;text-align:center;}
+  .seg-btn.active{background:rgba(251,191,36,.13);border-color:var(--gold);color:var(--gold);}
+  .color-input-row{display:flex;align-items:center;gap:10px;margin-top:10px;}
+  .color-input-row input[type=color]{width:46px;height:38px;border:1.5px solid var(--border-strong);border-radius:9px;background:var(--bg-input);cursor:pointer;padding:2px;}
+  .color-input-row input[type=text]{flex:1;background:var(--bg-input);border:1.5px solid var(--border);border-radius:9px;
+    padding:9px 11px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.9em;direction:ltr;text-align:left;outline:none;}
+  .color-input-row input[type=text]:focus{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-glow);}
+  .update-row{display:flex;flex-direction:column;gap:9px;}
+  .update-row .field{display:flex;flex-direction:column;gap:5px;}
+  .update-row label{font-size:.78em;color:var(--text-mid);font-weight:700;}
+  .update-row input{background:var(--bg-input);border:1.5px solid var(--border);border-radius:9px;padding:10px 11px;
+    color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.85em;direction:ltr;text-align:left;outline:none;}
+  .update-row input:focus{border-color:var(--cyan);box-shadow:0 0 0 2px var(--cyan-glow);}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:12px 16px;border-radius:11px;
+    border:none;font-family:inherit;font-size:.9em;font-weight:800;cursor:pointer;transition:all .18s;}
+  .btn:active{transform:scale(.98);}
+  .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:#1a1205;box-shadow:0 0 18px var(--gold-glow);}
+  .btn-cyan{background:linear-gradient(135deg,rgba(56,189,248,.2),rgba(56,189,248,.06));color:var(--cyan);border:1.5px solid var(--cyan);}
+  .btn-gray{background:var(--bg-elevated);color:var(--text-mid);border:1.5px solid var(--border);}
+  .btn-row{display:flex;gap:8px;margin-top:10px;}
+  .btn-row .btn{flex:1;}
+
+  /* ===== Toast ===== */
+  .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-110px);background:var(--bg-elevated);color:var(--text);
+    padding:12px 20px;border-radius:12px;border:1px solid var(--border-strong);box-shadow:var(--shadow-hover);z-index:300;
+    font-size:.88em;font-weight:600;transition:transform .3s cubic-bezier(.4,0,.2,1);max-width:90vw;text-align:center;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .toast.ok{border-color:var(--mint);color:var(--mint);}
+  .toast.err{border-color:var(--danger);color:var(--danger);}
+  .toast.info{border-color:var(--cyan);color:var(--cyan);}
+
+  .foot{flex:0 0 auto;text-align:center;font-size:.66em;color:var(--text-dim);padding:5px 10px calc(5px + env(safe-area-inset-bottom));}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 10 L55 15 L62 13 L65 20 L72 22 L72 30 L78 35 L76 42 L82 48 L78 55 L80 62 L74 68 L74 76 L67 78 L62 84 L55 82 L48 86 L42 81 L35 83 L30 77 L23 75 L22 67 L16 62 L18 55 L12 48 L17 42 L15 35 L21 29 L22 21 L29 19 L35 13 L42 15 Z" stroke="url(#g1)" stroke-width="3"/>
+          <path d="M50 25 C50 25 65 45 65 55 C65 63 58 70 50 70 C42 70 35 63 35 55 C35 45 50 25 50 25 Z" fill="url(#c1)" opacity=".8"/>
+          <path d="M45 52 L48 56 L55 46" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fcd34d"/><stop offset="1" stop-color="#d97706"/></linearGradient>
+            <linearGradient id="c1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#38bdf8"/><stop offset="1" stop-color="#0284c7"/></linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>جعبه‌ابزار مهندسی کاسپین</h1>
+        <div class="sub">Caspian Mobadel Amard · v1.0.0</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" id="updateBtn" onclick="openSettings('update')" title="بروزرسانی" style="position:relative;">
+        <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>
+        <span class="dot" id="updateDot"></span>
+      </button>
+      <button class="icon-btn" id="settingsBtn" onclick="openSettings()" title="تنظیمات">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="module-tabs">
+    <button class="module-tab active" id="tabCapacity" onclick="switchModule('capacity')">
+      <span class="ic">📐</span> ظرفیت‌سنجی تأسیسات
+    </button>
+    <button class="module-tab" id="tabPressure" onclick="switchModule('pressure')">
+      <span class="ic">🛢</span> مخزن تحت فشار
+    </button>
+  </div>
+  <div class="update-banner" id="updateBanner">
+    <span class="txt"><strong>نسخهٔ جدید آماده است!</strong> برای دریافت آخرین تغییرات برنامه را بارگذاری مجدد کنید.</span>
+    <button onclick="applyUpdate()">بارگذاری مجدد</button>
+  </div>
+</div>
+
+<main class="shell-main">
+  <iframe class="frame" id="frameCapacity" title="ظرفیت‌سنجی" loading="lazy" src="capacity.html"></iframe>
+  <iframe class="frame" id="framePressure" title="مخزن تحت فشار" hidden></iframe>
+</main>
+
+<div class="foot">Caspian Mobadel Amard — جعبه‌ابزار مهندسی · نسخه 1.0.0</div>
+
+<!-- ===== تنظیمات ===== -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeSettings()">
+  <div class="settings">
+    <h2>تنظیمات برنامه <button class="close" onclick="closeSettings()">✕</button></h2>
+    <p class="sub">تم، رنگ تاکیدی، پس‌زمینه و فونت را شخصی‌سازی کنید. تنظیمات به‌صورت خودکار ذخیره و به هر دو ماژول اعمال می‌شود.</p>
+
+    <div class="set-group">
+      <h3>🌓 حالت نمایش</h3>
+      <div class="seg">
+        <button class="seg-btn" data-theme="dark" onclick="setTheme('dark')">تیره</button>
+        <button class="seg-btn" data-theme="light" onclick="setTheme('light')">روشن</button>
+      </div>
+    </div>
+
+    <div class="set-group">
+      <h3>🎨 رنگ تاکیدی</h3>
+      <div class="swatches" id="accentSwatches"></div>
+      <div class="color-input-row">
+        <input type="color" id="accentColor" value="#fbbf24" oninput="setAccent(this.value,false)" onchange="setAccent(this.value,true)">
+        <input type="text" id="accentHex" value="#fbbf24" spellcheck="false" onchange="setAccent(this.value,true)">
+      </div>
+    </div>
+
+    <div class="set-group">
+      <h3>🖼 پس‌زمینه</h3>
+      <div class="swatches" id="bgSwatches"></div>
+      <div class="color-input-row">
+        <input type="color" id="bgColor" value="#1e2a3a" oninput="setBg(this.value,false)" onchange="setBg(this.value,true)">
+        <input type="text" id="bgHex" value="#1e2a3a" spellcheck="false" onchange="setBg(this.value,true)">
+      </div>
+      <p style="font-size:.72em;color:var(--text-dim);margin-top:8px;">در حالت روشن، پس‌زمینهٔ روشن ثابت استفاده می‌شود.</p>
+    </div>
+
+    <div class="set-group">
+      <h3>🔠 اندازه فونت</h3>
+      <div class="seg">
+        <button class="seg-btn" data-font="small" onclick="setFont('small')">کوچک</button>
+        <button class="seg-btn" data-font="medium" onclick="setFont('medium')">متوسط</button>
+        <button class="seg-btn" data-font="large" onclick="setFont('large')">بزرگ</button>
+        <button class="seg-btn" data-font="xlarge" onclick="setFont('xlarge')">خیلی بزرگ</button>
+      </div>
+    </div>
+
+    <div class="set-group">
+      <h3>🔤 فونت برنامه</h3>
+      <select id="fontFamilySelect" onchange="setFontFamily(this.value)" style="width:100%;padding:11px;background:var(--bg-input);border:1.5px solid var(--border);border-radius:9px;color:var(--text);font-family:inherit;font-size:.9em;outline:none;"></select>
+      <p style="font-size:.72em;color:var(--text-dim);margin-top:8px;">۵۰+ فونت. «Vazirmatn» محلی و آفلاین است؛ بقیه از Google Fonts لود میشوند (آنلاین) و در نبود اینترنت به Vazirmatn برمیگردند.</p>
+    </div>
+
+    <div class="set-group">
+      <h3>📏 واحدها</h3>
+      <div class="seg">
+        <button class="seg-btn" data-unit="metric" onclick="setUnits('metric')">متریک</button>
+        <button class="seg-btn" data-unit="imperial" onclick="setUnits('imperial')">امپریال</button>
+      </div>
+      <p style="font-size:.72em;color:var(--text-dim);margin-top:8px;">بر نمایش نتایج تب «تجهیزات» اثر می‌گذارد.</p>
+    </div>
+
+    <div class="set-group" id="updateGroup">
+      <h3>🔄 بروزرسانی</h3>
+      <div class="update-row">
+        <div class="field">
+          <label>آدرس فایل version.json (برای بروزرسانی APK)</label>
+          <input type="text" id="updateUrl" spellcheck="false" placeholder="https://YOUR-SERVER/version.json">
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-cyan" onclick="checkUpdate()">🔍 بررسی بروزرسانی</button>
+          <button class="btn btn-gray" onclick="reloadApp()">↺ بارگذاری مجدد</button>
+        </div>
+        <p id="updateStatus" style="font-size:.74em;color:var(--text-dim);"></p>
+      </div>
+    </div>
+
+    <div class="set-group">
+      <h3>💾 پشتیبان‌گیری و بازیابی</h3>
+      <div class="update-row">
+        <div class="btn-row">
+          <button class="btn btn-gold" onclick="backupData()">⬇️ خروجی پشتیبان (JSON)</button>
+          <button class="btn btn-gray" onclick="document.getElementById('restoreFile').click()">📂 بازیابی</button>
+        </div>
+        <input type="file" id="restoreFile" accept="application/json,.json" style="display:none" onchange="restoreData(this)">
+        <p style="font-size:.74em;color:var(--text-dim);">همهٔ داده‌ها (محاسبات، تاریخچه، قیمت‌ها و تنظیمات) را در یک فایل ذخیره/بازیابی می‌کند — برای مواقعی که iOS حافظه را پاک می‌کند.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="bridge.js"></script>
+<script>
+const APP_VERSION = '1.0.0';
+const APP_VERSION_CODE = 1;
+
+/* ===== ماژول‌ها ===== */
+const MODULES = { capacity: 'frameCapacity', pressure: 'framePressure' };
+const MODULE_SRCS = { capacity: 'capacity.html', pressure: 'pressure.html' };
+let currentModule = 'capacity';
+
+function switchModule(name) {
+  currentModule = name;
+  document.getElementById('tabCapacity').classList.toggle('active', name === 'capacity');
+  document.getElementById('tabPressure').classList.toggle('active', name === 'pressure');
+  const frame = document.getElementById(MODULES[name]);
+  frame.hidden = false;
+  if (!frame.dataset.loaded) { frame.src = MODULE_SRCS[name]; frame.dataset.loaded = '1'; }
+  // مخفی کردن دیگری
+  Object.keys(MODULES).forEach(k => {
+    if (k !== name) document.getElementById(MODULES[k]).hidden = true;
+  });
+  broadcastTheme();
+}
+
+/* ===== پخش تم به iframeها (پشتیبان برای file:// / WebView) ===== */
+function broadcastTheme() {
+  const msg = {
+    __caspianTheme: true,
+    theme: localStorage.getItem('caspian_theme') || 'dark',
+    accent: localStorage.getItem('caspian_accent') || '#fbbf24',
+    bg: localStorage.getItem('caspian_bg') || '#1e2a3a',
+    font: localStorage.getItem('caspian_font') || 'medium',
+    fontFamily: localStorage.getItem('caspian_font_family') || 'Vazirmatn'
+  };
+  Object.keys(MODULES).forEach(k => {
+    const f = document.getElementById(MODULES[k]);
+    try { if (f && f.contentWindow) f.contentWindow.postMessage(msg, '*'); } catch (e) {}
+  });
+}
+
+/* ===== تنظیمات ===== */
+const ACCENT_SWATCHES = ['#fbbf24','#38bdf8','#a78bfa','#fb7185','#4ade80','#fcd34d','#f87171','#60a5fa'];
+const BG_SWATCHES = ['#1e2a3a','#0a0f1a','#0c1f3a','#0c2b22','#1a1435','#2b1216','#16202e','#22201a'];
+const FONT_OPTIONS = [
+  ['Vazirmatn','Vazirmatn (پیش‌فرض)'],['Estedad','Estedad'],['Noto Naskh Arabic','Noto Naskh Arabic'],
+  ['Noto Kufi Arabic','Noto Kufi Arabic'],['Noto Sans Arabic','Noto Sans Arabic'],['Cairo','Cairo'],
+  ['Tajawal','Tajawal'],['Amiri','Amiri'],['Amiri Quran','Amiri Quran'],['Scheherazade New','Scheherazade New'],
+  ['Scheherazade','Scheherazade'],['Lateef','Lateef'],['Reem Kufi','Reem Kufi'],['Reem Kufi Fun','Reem Kufi Fun'],
+  ['Reem Kufi Ink','Reem Kufi Ink'],['Almarai','Almarai'],['Harmattan','Harmattan'],['Jomhuria','Jomhuria'],
+  ['Katibeh','Katibeh'],['Lalezar','Lalezar'],['Markazi Text','Markazi Text'],['Mada','Mada'],
+  ['Changa','Changa'],['El Messiri','El Messiri'],['Gulzar','Gulzar'],['IBM Plex Sans Arabic','IBM Plex Sans Arabic'],
+  ['Kufam','Kufam'],['Aref Ruqaa','Aref Ruqaa'],['Aref Ruqaa Ink','Aref Ruqaa Ink'],['Rakkas','Rakkas'],
+  ['Baloo Bhaijaan 2','Baloo Bhaijaan 2'],['Ruwudu','Ruwudu'],['Mirza','Mirza'],['Readex Pro','Readex Pro'],
+  ['Alef','Alef'],['Alkatra','Alkatra'],['Alexandria','Alexandria'],['Marhey','Marhey'],['Blaka','Blaka'],
+  ['Cairo Play','Cairo Play'],['Noto Nastaliq Urdu','Noto Nastaliq Urdu'],['Zain','Zain'],
+  ['Rubik','Rubik (لاتین)'],['Nunito','Nunito (لاتین)'],['Inter','Inter (لاتین)'],['Poppins','Poppins (لاتین)'],
+  ['Montserrat','Montserrat (لاتین)'],['Lato','Lato (لاتین)'],['Open Sans','Open Sans (لاتین)'],['Raleway','Raleway (لاتین)'],['Oswald','Oswald (لاتین)']
+];
+
+function buildSwatches() {
+  const acc = document.getElementById('accentSwatches');
+  ACCENT_SWATCHES.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'swatch'; b.style.background = c; b.title = c;
+    b.onclick = () => setAccent(c, true);
+    acc.appendChild(b);
+  });
+  const bg = document.getElementById('bgSwatches');
+  BG_SWATCHES.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'swatch'; b.style.background = c; b.title = c;
+    b.style.boxShadow = 'inset 0 0 0 1px rgba(255,255,255,.12)';
+    b.onclick = () => setBg(c, true);
+    bg.appendChild(b);
+  });
+}
+
+function setTheme(t) {
+  CaspianTheme.set('theme', t);
+  syncSettingsUI(); broadcastTheme(); toast('تم ' + (t === 'dark' ? 'تیره' : 'روشن') + ' اعمال شد', 'ok');
+}
+function setAccent(hex, applyNow) {
+  const h = normalizeHex(hex); if (!h) { toast('رنگ نامعتبر است', 'err'); return; }
+  if (!applyNow) { document.getElementById('accentHex').value = h; return; }
+  CaspianTheme.set('accent', h);
+  syncSettingsUI(); broadcastTheme(); toast('رنگ تاکیدی اعمال شد', 'ok');
+}
+function setBg(hex, applyNow) {
+  const h = normalizeHex(hex); if (!h) { toast('رنگ نامعتبر است', 'err'); return; }
+  if (!applyNow) { document.getElementById('bgHex').value = h; return; }
+  CaspianTheme.set('bg', h);
+  syncSettingsUI(); broadcastTheme(); toast('پس‌زمینه اعمال شد', 'ok');
+}
+function setFont(f) {
+  CaspianTheme.set('font', f);
+  syncSettingsUI(); broadcastTheme(); toast('اندازه فونت اعمال شد', 'ok');
+}
+function setUnits(u) {
+  localStorage.setItem('caspian_units', u);
+  syncSettingsUI(); broadcastTheme(); toast('واحدها: ' + (u === 'metric' ? 'متریک' : 'امپریال'), 'ok');
+}
+function setFontFamily(f) {
+  CaspianTheme.set('fontFamily', f);
+  syncSettingsUI(); broadcastTheme(); toast('فونت: ' + f, 'ok');
+}
+function buildFontOptions() {
+  const sel = document.getElementById('fontFamilySelect');
+  if (!sel) return;
+  sel.innerHTML = FONT_OPTIONS.map(o => '<option value="' + o[0] + '">' + o[1] + '</option>').join('');
+}
+function normalizeHex(h) {
+  h = String(h || '').trim().replace('#', '');
+  if (h.length === 3) h = h.split('').map(c => c + c).join('');
+  return /^[0-9a-fA-F]{6}$/.test(h) ? '#' + h.toLowerCase() : null;
+}
+
+function syncSettingsUI() {
+  const t = localStorage.getItem('caspian_theme') || 'dark';
+  const a = (localStorage.getItem('caspian_accent') || '#fbbf24').toLowerCase();
+  const b = (localStorage.getItem('caspian_bg') || '#1e2a3a').toLowerCase();
+  const f = localStorage.getItem('caspian_font') || 'medium';
+  document.querySelectorAll('.seg-btn[data-theme]').forEach(x => x.classList.toggle('active', x.dataset.theme === t));
+  document.querySelectorAll('.seg-btn[data-font]').forEach(x => x.classList.toggle('active', x.dataset.font === f));
+  const un = localStorage.getItem('caspian_units') || 'metric';
+  document.querySelectorAll('.seg-btn[data-unit]').forEach(x => x.classList.toggle('active', x.dataset.unit === un));
+  const ff = localStorage.getItem('caspian_font_family') || 'Vazirmatn';
+  const fs = document.getElementById('fontFamilySelect');
+  if (fs) fs.value = ff;
+  document.querySelectorAll('#accentSwatches .swatch').forEach(x => x.classList.toggle('active', x.style.background.toLowerCase() === a));
+  document.querySelectorAll('#bgSwatches .swatch').forEach(x => x.classList.toggle('active', x.style.background.toLowerCase() === b));
+  document.getElementById('accentColor').value = a;
+  document.getElementById('accentHex').value = a;
+  document.getElementById('bgColor').value = b;
+  document.getElementById('bgHex').value = b;
+  document.getElementById('updateUrl').value = localStorage.getItem('caspian_update_url') || '';
+  // همگام‌سازی theme-color
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = t === 'light' ? '#f0f4f8' : b;
+}
+
+/* ===== پنل تنظیمات ===== */
+function openSettings(focus) {
+  syncSettingsUI();
+  document.getElementById('overlay').classList.add('show');
+  if (focus === 'update') {
+    const g = document.getElementById('updateGroup');
+    if (g) g.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+function closeSettings() { document.getElementById('overlay').classList.remove('show'); }
+
+/* ===== Toast ===== */
+let toastTimer;
+function toast(msg, kind) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + (kind || '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* ===== بروزرسانی ===== */
+function reloadApp() { location.reload(); }
+function applyUpdate() {
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker.getRegistration().then(reg => { if (reg && reg.waiting) reg.waiting.postMessage('SKIP_WAITING'); });
+  }
+  setTimeout(() => location.reload(), 400);
+}
+
+function checkUpdate() {
+  const urlInput = document.getElementById('updateUrl');
+  const url = urlInput.value.trim();
+  if (url) localStorage.setItem('caspian_update_url', url);
+  const target = url || 'version.json';
+  const status = document.getElementById('updateStatus');
+  status.textContent = 'در حال بررسی…';
+  fetch(target, { cache: 'no-store' })
+    .then(r => r.json())
+    .then(data => {
+      const remote = data.versionCode || 0;
+      if (remote > APP_VERSION_CODE) {
+        status.innerHTML = 'نسخهٔ جدید ' + (data.version || remote) + ' موجود است.';
+        if (data.apk_url) {
+          toast('نسخهٔ جدید پیدا شد — در حال دریافت فایل نصبی', 'info');
+          window.open(data.apk_url, '_blank');
+        } else {
+          toast('نسخهٔ جدید موجود است: ' + (data.notes || ''), 'info');
+        }
+      } else {
+        status.textContent = 'برنامه به‌روز است (نسخه ' + APP_VERSION + ').';
+        toast('برنامه به‌روز است', 'ok');
+      }
+    })
+    .catch(() => {
+      status.textContent = 'خطا در بررسی بروزرسانی — آدرس version.json را بررسی کنید.';
+      toast('بررسی بروزرسانی ناموفق بود', 'err');
+    });
+}
+
+/* ===== Service Worker ===== */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return; refreshing = true; location.reload();
+    });
+  });
+}
+
+/* ===== پشتیبان‌گیری ===== */
+function backupData() {
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); try { data[k] = localStorage.getItem(k); } catch(e){} }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'caspian-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  toast('فایل پشتیبان دانلود شد', 'ok');
+}
+function restoreData(input) {
+  const f = input.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const data = JSON.parse(r.result);
+      let n = 0;
+      for (const k in data) { try { localStorage.setItem(k, data[k]); n++; } catch(e){} }
+      toast('بازیابی شد (' + n + ' مورد) — بارگذاری مجدد...', 'ok');
+      setTimeout(() => location.reload(), 1200);
+    } catch (e) { toast('فایل نامعتبر است', 'err'); }
+  };
+  r.readAsText(f);
+  input.value = '';
+}
+
+/* ===== init ===== */
+buildSwatches();
+buildFontOptions();
+syncSettingsUI();
+document.getElementById('frameCapacity').dataset.loaded = '1';
+CaspianTheme.apply();
+</script>
+</body>
+</html>

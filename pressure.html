@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#1F1A12">
+<title>مخزن تحت فشار — کاسپین مبدل آمارد</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="lib/vazirmatn.css" rel="stylesheet">
+<script src="lib/qrcode.min.js" defer></script>
+<style>
+/* ============================================================
+   Pressure Tank Calculator v7 — Modern Industrial Theme
+   ============================================================ */
+:root{
+  --bg-0:#F2EFE9;--bg-1:#FAF8F4;--bg-2:#FFFFFF;
+  --surface:#FFFFFF;--surface-2:#FAF7F1;--surface-3:#F0ECE4;
+  --ink-0:#0F0D0A;--ink-1:#2A241C;--ink-2:#5A4E3E;--ink-3:#8A7D6A;--ink-4:#B8A892;
+  --line-soft:#E8E2D5;--line:#D8D0BE;--line-hi:#A89B80;
+  --accent:#FF6B1A;--accent-2:#E04E00;--accent-glow:rgba(255,107,26,.28);
+  --accent-2-c:#3B82F6;--accent-2-glow:rgba(59,130,246,.25);
+  --ok:#10B981;--ok-2:#059669;--ok-glow:rgba(16,185,129,.25);
+  --warn:#F59E0B;--warn-2:#D97706;
+  --err:#EF4444;--err-2:#DC2626;
+  --info:#8B5CF6;--info-2:#7C3AED;
+  --r-sm:6px;--r:10px;--r-lg:16px;--r-xl:22px;
+  --shadow-1:0 1px 2px rgba(15,13,10,.06), 0 2px 8px rgba(15,13,10,.04);
+  --shadow-2:0 2px 8px rgba(15,13,10,.08), 0 8px 24px rgba(15,13,10,.06);
+  --shadow-3:0 8px 24px rgba(15,13,10,.12), 0 24px 48px rgba(15,13,10,.08);
+  --glass:rgba(255,255,255,.72);
+  --glass-border:rgba(255,255,255,.6);
+  --font-mono:'JetBrains Mono','Courier New',monospace;
+  --font: 'Vazirmatn', Tahoma, sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --ease-bounce:cubic-bezier(.34,1.56,.64,1);
+  --transition:all .28s var(--ease);
+}
+[data-theme="dark"]{
+  --bg-0:#0A0906;--bg-1:#12100C;--bg-2:#1A1712;
+  --surface:#1F1B14;--surface-2:#262219;--surface-3:#2E2A20;
+  --ink-0:#F5EFE0;--ink-1:#E8DFCC;--ink-2:#B8A78A;--ink-3:#7A6D57;--ink-4:#5A4E3E;
+  --line-soft:#2A2520;--line:#3A3228;--line-hi:#5A4E3E;
+  --accent:#FF8A3D;--accent-2:#FF6B1A;--accent-glow:rgba(255,138,61,.35);
+  --accent-2-c:#60A5FA;--accent-2-glow:rgba(96,165,250,.3);
+  --ok:#34D399;--ok-2:#10B981;--ok-glow:rgba(52,211,153,.3);
+  --warn:#FBBF24;--warn-2:#F59E0B;
+  --err:#F87171;--err-2:#EF4444;
+  --info:#A78BFA;--info-2:#8B5CF6;
+  --shadow-1:0 1px 2px rgba(0,0,0,.3), 0 2px 8px rgba(0,0,0,.2);
+  --shadow-2:0 2px 8px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  --shadow-3:0 8px 24px rgba(0,0,0,.5), 0 24px 48px rgba(0,0,0,.35);
+  --glass:rgba(31,27,20,.72);
+  --glass-border:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font);background:var(--bg-0);color:var(--ink-1);
+  font-size:14px;line-height:1.65;min-height:100vh;padding-bottom:80px;
+  transition:background .4s var(--ease), color .4s var(--ease);
+  background-image:
+    radial-gradient(circle at 20% 0%, color-mix(in srgb,var(--accent) 8%, transparent) 0%, transparent 40%),
+    radial-gradient(circle at 80% 100%, color-mix(in srgb,var(--accent-2-c) 6%, transparent) 0%, transparent 40%),
+    repeating-linear-gradient(0deg, color-mix(in srgb,var(--ink-0) 3%, transparent) 0 1px, transparent 1px 48px),
+    repeating-linear-gradient(90deg, color-mix(in srgb,var(--ink-0) 3%, transparent) 0 1px, transparent 1px 48px);
+  background-attachment:fixed;
+}
+input[type=number],input[type=text]{
+  font-family:var(--font-mono);font-weight:600;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ============ Sticky Header ============ */
+.sticky-top{
+  position:sticky;top:0;z-index:100;
+  background:linear-gradient(180deg,var(--bg-0) 0%, color-mix(in srgb,var(--bg-0) 92%, transparent) 100%);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border-bottom:1px solid var(--line-soft);
+  box-shadow:0 4px 24px -8px color-mix(in srgb,var(--ink-0) 15%, transparent);
+}
+header{
+  padding:18px 20px 12px;
+  display:flex;justify-content:space-between;align-items:center;
+  max-width:1180px;margin:0 auto;gap:16px;
+}
+.brand{display:flex;align-items:center;gap:14px}
+.logo-mark{
+  width:52px;height:52px;border-radius:14px;
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent-2) 100%);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 24px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,.25);
+  position:relative;overflow:hidden;
+}
+.logo-mark::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.3) 50%,transparent 60%);
+  animation:shine 4s ease-in-out infinite;
+}
+@keyframes shine{0%,100%{transform:translateX(-100%)}50%{transform:translateX(100%)}}
+.logo-mark svg,.logo-mark img{width:32px;height:32px;position:relative;z-index:1}
+.brand-text h1{
+  font-size:16px;font-weight:800;color:var(--ink-0);letter-spacing:-.01em;
+  background:linear-gradient(90deg,var(--ink-0),var(--accent-2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.brand-text .sub{
+  font-size:9.5px;color:var(--ink-3);letter-spacing:3px;
+  text-transform:uppercase;font-weight:700;margin-top:2px;
+}
+.header-actions{display:flex;gap:8px}
+.icon-btn{
+  width:40px;height:40px;border-radius:10px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink-2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:var(--transition);
+}
+.icon-btn:hover{background:var(--surface-2);border-color:var(--line-hi);transform:translateY(-1px)}
+
+/* ============ Tabs ============ */
+.tabs{
+  display:flex;overflow-x:auto;scrollbar-width:none;
+  padding:8px 16px 0;gap:4px;max-width:1180px;margin:0 auto;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  flex:0 0 auto;padding:10px 16px;font-size:12.5px;font-weight:700;
+  color:var(--ink-3);background:transparent;border:none;cursor:pointer;
+  font-family:inherit;border-radius:10px 10px 0 0;position:relative;
+  transition:var(--transition);white-space:nowrap;letter-spacing:.2px;
+}
+.tab::after{
+  content:'';position:absolute;left:16px;right:16px;bottom:0;height:3px;
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  border-radius:3px 3px 0 0;transform:scaleX(0);transform-origin:center;
+  transition:transform .3s var(--ease-bounce);
+}
+.tab:hover{color:var(--ink-1);background:color-mix(in srgb,var(--accent) 4%, transparent)}
+.tab.active{color:var(--accent-2);background:color-mix(in srgb,var(--accent) 8%, transparent)}
+.tab.active::after{transform:scaleX(1)}
+
+/* ============ Main ============ */
+main{padding:20px;max-width:1180px;margin:0 auto}
+.panel{display:none;animation:panelIn .4s var(--ease)}
+.panel.active{display:block}
+@keyframes panelIn{
+  from{opacity:0;transform:translateY(12px) scale(.99)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* ============ Section Title ============ */
+.section-title{
+  display:flex;align-items:center;gap:12px;
+  font-size:11.5px;font-weight:800;color:var(--ink-2);
+  letter-spacing:1.4px;text-transform:uppercase;
+  margin:26px 0 14px;
+}
+.section-title::before{
+  content:'';width:4px;height:22px;border-radius:2px;
+  background:linear-gradient(180deg,var(--accent),var(--accent-2));
+  box-shadow:0 0 12px var(--accent-glow);
+}
+.section-title::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,var(--line),transparent);
+}
+
+/* ============ Card ============ */
+.card{
+  background:var(--glass);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid var(--glass-border);
+  border-radius:var(--r-lg);
+  padding:20px;margin-bottom:16px;
+  box-shadow:var(--shadow-2);
+  position:relative;overflow:hidden;
+  transition:var(--transition);
+}
+.card:hover{box-shadow:var(--shadow-3);transform:translateY(-1px)}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--ink-2),var(--ink-3));
+  opacity:.5;
+}
+.card.orange::before{background:linear-gradient(90deg,var(--accent),var(--accent-2));opacity:1}
+.card.blue::before{background:linear-gradient(90deg,var(--accent-2-c),#1E40AF);opacity:1}
+.card.green::before{background:linear-gradient(90deg,var(--ok),var(--ok-2));opacity:1}
+.card.violet::before{background:linear-gradient(90deg,var(--info),var(--info-2));opacity:1}
+.card.yellow::before{background:linear-gradient(90deg,var(--warn),var(--warn-2));opacity:1}
+.card.red::before{background:linear-gradient(90deg,var(--err),var(--err-2));opacity:1}
+.card h2{
+  margin:0 0 18px;font-size:16px;font-weight:800;color:var(--ink-0);
+  display:flex;align-items:center;gap:12px;
+}
+.card h2::before{
+  content:'';width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  box-shadow:0 4px 12px var(--accent-glow);
+  flex-shrink:0;
+}
+
+/* ============ Field / Input ============ */
+.field{margin-bottom:16px;position:relative}
+.field label{
+  display:block;font-size:11px;margin-bottom:8px;
+  color:var(--ink-2);font-weight:700;letter-spacing:.3px;
+}
+.field input,.field select{
+  width:100%;padding:14px 16px;
+  border:1.5px solid var(--line);border-radius:10px;
+  font-family:inherit;background:var(--surface);color:var(--ink-0);
+  transition:var(--transition);-webkit-appearance:none;appearance:none;
+  font-size:14px;
+}
+.field input[type=number]{
+  font-family:var(--font-mono);font-size:17px;font-weight:700;
+  letter-spacing:-.02em;
+}
+.field select{
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E04E00' stroke-width='2.5'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");
+  background-repeat:no-repeat;background-position:left 14px center;background-size:14px;
+  padding-left:42px;font-weight:700;cursor:pointer;
+}
+.field input:focus,.field select:focus{
+  outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 4px var(--accent-glow);
+  background:var(--surface-2);
+}
+
+/* ============ Rows ============ */
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.row4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:800px){.row3,.row4{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.row,.row2,.row3,.row4{grid-template-columns:1fr}}
+
+/* ============ Buttons ============ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:14px 20px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:#fff;border:none;border-radius:10px;
+  font-size:14.5px;font-weight:800;cursor:pointer;font-family:inherit;
+  letter-spacing:.3px;transition:var(--transition);
+  box-shadow:0 4px 16px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,.2);
+  position:relative;overflow:hidden;margin-top:8px;
+}
+.btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);
+  transform:translateX(-100%);transition:transform .6s var(--ease);
+}
+.btn:hover::before{transform:translateX(100%)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,.3)}
+.btn:active{transform:translateY(0)}
+.btn.blue{background:linear-gradient(135deg,var(--accent-2-c),#1E40AF);box-shadow:0 4px 16px var(--accent-2-glow), inset 0 1px 0 rgba(255,255,255,.2)}
+.btn.green{background:linear-gradient(135deg,var(--ok),var(--ok-2));box-shadow:0 4px 16px var(--ok-glow), inset 0 1px 0 rgba(255,255,255,.2)}
+.btn.violet{background:linear-gradient(135deg,var(--info),var(--info-2));box-shadow:0 4px 16px rgba(139,92,246,.28), inset 0 1px 0 rgba(255,255,255,.2)}
+.btn.gray{
+  background:var(--surface-2);color:var(--ink-1);
+  border:1.5px solid var(--line);box-shadow:none;
+}
+.btn.gray:hover{background:var(--surface-3);border-color:var(--line-hi);box-shadow:none}
+.btn.small{padding:10px 14px;font-size:12.5px;margin-top:6px}
+.btn.red{background:linear-gradient(135deg,var(--err),var(--err-2));box-shadow:0 4px 16px rgba(239,68,68,.28)}
+
+/* ============ Result Summary ============ */
+.res-summary{
+  background:linear-gradient(135deg,var(--ink-0),color-mix(in srgb,var(--ink-0) 85%, var(--accent)));
+  border-radius:var(--r-lg);padding:24px;text-align:center;color:#fff;
+  position:relative;overflow:hidden;margin:18px 0;
+  box-shadow:var(--shadow-3);
+}
+.res-summary::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 0% 100%, var(--accent-glow) 0%, transparent 50%),
+    radial-gradient(circle at 100% 0%, var(--accent-2-glow) 0%, transparent 50%);
+  opacity:.8;
+}
+.res-summary::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent-2-c),var(--ok),var(--accent));
+  background-size:200% 100%;animation:slide 4s linear infinite;
+}
+@keyframes slide{from{background-position:0% 0}to{background-position:200% 0}}
+.res-summary .lbl{
+  position:relative;font-size:10.5px;color:rgba(255,255,255,.65);
+  letter-spacing:3px;text-transform:uppercase;font-weight:800;margin-bottom:8px;
+}
+.res-summary .val{
+  position:relative;font-family:var(--font-mono);
+  font-size:52px;font-weight:800;line-height:1;direction:ltr;
+  background:linear-gradient(135deg,#fff,var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;letter-spacing:-.03em;margin:12px 0;
+}
+.res-summary .unit{position:relative;font-size:13px;color:rgba(255,255,255,.7);font-weight:600}
+.res-summary.blue{border-color:var(--accent-2-c)}
+.res-summary.blue::after{background:linear-gradient(90deg,var(--accent-2-c),var(--info),var(--accent-2-c));background-size:200% 100%}
+.res-summary.green{border-color:var(--ok)}
+.res-summary.green::after{background:linear-gradient(90deg,var(--ok),#4ADE80,var(--ok));background-size:200% 100%}
+.res-summary.violet{border-color:var(--info)}
+.res-summary.violet::after{background:linear-gradient(90deg,var(--info),#A78BFA,var(--info));background-size:200% 100%}
+
+/* ============ Result Rows ============ */
+.res-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 0;gap:16px;font-size:13.5px;
+  border-bottom:1px dashed var(--line-soft);
+}
+.res-row:last-child{border-bottom:none}
+.res-row .lbl{color:var(--ink-2);flex:1;font-weight:600}
+.res-row .val{
+  color:var(--ink-0);font-weight:800;
+  font-family:var(--font-mono);font-size:15.5px;letter-spacing:-.02em;
+}
+.res-row.cost .val{color:var(--accent-2)}
+.res-row.auto .val{color:var(--ok-2)}
+.res-row.qty .val{color:var(--accent-2-c)}
+.res-row.big{padding:16px 0;font-size:15px}
+.res-row.big .val{font-size:22px;font-weight:800}
+[data-theme="dark"] .res-row.cost .val{color:var(--accent)}
+[data-theme="dark"] .res-row.auto .val{color:var(--ok)}
+[data-theme="dark"] .res-row.qty .val{color:var(--accent-2-c)}
+
+/* ============ Info Box ============ */
+.info-box{
+  background:color-mix(in srgb,var(--accent-2-c) 6%, transparent);
+  border:1.5px solid color-mix(in srgb,var(--accent-2-c) 25%, transparent);
+  border-left:4px solid var(--accent-2-c);
+  border-radius:12px;padding:14px 16px;color:var(--ink-1);
+  font-size:12.5px;line-height:1.9;margin-top:14px;
+}
+.info-box b{color:var(--accent-2-c);font-weight:800}
+.info-box.orange{background:color-mix(in srgb,var(--accent) 6%, transparent);border-color:color-mix(in srgb,var(--accent) 25%, transparent);border-left-color:var(--accent)}
+.info-box.orange b{color:var(--accent-2)}
+.info-box.green{background:color-mix(in srgb,var(--ok) 6%, transparent);border-color:color-mix(in srgb,var(--ok) 25%, transparent);border-left-color:var(--ok)}
+.info-box.green b{color:var(--ok-2)}
+.info-box.red{background:color-mix(in srgb,var(--err) 6%, transparent);border-color:color-mix(in srgb,var(--err) 25%, transparent);border-left-color:var(--err)}
+.info-box.red b{color:var(--err-2)}
+.info-box.violet{background:color-mix(in srgb,var(--info) 6%, transparent);border-color:color-mix(in srgb,var(--info) 25%, transparent);border-left-color:var(--info)}
+.info-box.violet b{color:var(--info-2)}
+.info-box.yellow{background:color-mix(in srgb,var(--warn) 8%, transparent);border-color:color-mix(in srgb,var(--warn) 35%, transparent);border-left-color:var(--warn)}
+.info-box.yellow b{color:var(--warn-2)}
+
+/* ============ Schematic ============ */
+.schematic{
+  background:var(--surface-2);
+  border:1.5px solid var(--line);
+  border-radius:var(--r-lg);padding:20px;margin:16px 0;
+  text-align:center;overflow:hidden;
+  position:relative;
+}
+.schematic::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(var(--line-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+  background-size:20px 20px;opacity:.4;pointer-events:none;
+}
+.schematic svg{max-width:100%;height:auto;position:relative;z-index:1}
+
+/* ============ Mode Tabs ============ */
+.mode-tabs{
+  display:flex;flex-wrap:wrap;gap:4px;background:var(--surface-2);
+  border:1.5px solid var(--line);border-radius:12px;padding:4px;
+  margin-bottom:16px;
+}
+.mode-tab{
+  flex:1;min-width:100px;padding:10px 18px;border:none;background:transparent;border-radius:8px;
+  font-family:inherit;font-size:12.5px;font-weight:700;
+  color:var(--ink-3);cursor:pointer;transition:var(--transition);white-space:nowrap;
+}
+.mode-tab.active{
+  background:var(--surface);color:var(--accent-2);
+  box-shadow:var(--shadow-1);
+  border:1px solid color-mix(in srgb,var(--accent) 30%, transparent);
+}
+.mode-tab:hover:not(.active){color:var(--ink-1);background:color-mix(in srgb,var(--accent) 6%, transparent)}
+.mode-body{display:none}
+.mode-body.active{display:block;animation:panelIn .3s var(--ease)}
+
+/* ============ Table ============ */
+table{
+  width:100%;border-collapse:separate;border-spacing:0;
+  font-size:13px;background:var(--surface);
+  border-radius:12px;overflow:hidden;
+  border:1.5px solid var(--line);
+}
+th,td{padding:12px 10px;text-align:center;border-bottom:1px solid var(--line-soft)}
+th{
+  background:linear-gradient(180deg,var(--surface-2),var(--surface-3));
+  color:var(--ink-2);font-weight:800;font-size:11px;
+  letter-spacing:.5px;text-transform:uppercase;
+}
+td{color:var(--ink-1);font-family:var(--font-mono);font-weight:700;font-size:14px}
+tr:last-child td{border-bottom:none}
+tr:nth-child(even) td{background:color-mix(in srgb,var(--ink-0) 2%, transparent)}
+tr.best td{background:color-mix(in srgb,var(--ok) 12%, transparent) !important;color:var(--ok-2)}
+
+/* ============ Equipment Select ============ */
+.eq-select{
+  background:var(--surface);border:1.5px solid var(--line);
+  border-radius:var(--r-lg);padding:16px;margin-bottom:12px;
+  box-shadow:var(--shadow-1);
+}
+.eq-select label{
+  display:block;font-size:11.5px;font-weight:800;color:var(--ink-2);
+  letter-spacing:.5px;margin-bottom:10px;text-transform:uppercase;
+}
+.eq-select select{
+  width:100%;padding:13px 42px 13px 14px;
+  background:var(--surface-2);border:1.5px solid var(--line);border-radius:10px;
+  color:var(--ink-0);font-family:inherit;font-size:14.5px;font-weight:800;cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E04E00' stroke-width='2.5'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");
+  background-repeat:no-repeat;background-position:left 14px center;background-size:14px;
+}
+.eq-select select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-glow)}
+
+.eq-header{
+  display:flex;align-items:center;gap:14px;
+  background:linear-gradient(135deg,var(--ink-0),color-mix(in srgb,var(--ink-0) 80%,var(--accent)));
+  border-radius:12px;padding:16px;margin-top:12px;
+  position:relative;overflow:hidden;
+}
+.eq-header::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(-45deg,rgba(255,107,26,.05) 0px,rgba(255,107,26,.05) 8px,transparent 8px,transparent 16px);
+  pointer-events:none;
+}
+.eq-icon{
+  width:56px;height:56px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));border-radius:12px;
+  box-shadow:0 4px 16px var(--accent-glow);position:relative;z-index:1;
+}
+.eq-icon svg{width:32px;height:32px;stroke:#fff;fill:none;stroke-width:1.8}
+.eq-info{flex:1;position:relative;z-index:1}
+.eq-info h3{margin:0 0 3px;font-size:15px;font-weight:800;color:#fff}
+.eq-info p{margin:0;font-size:11.5px;color:rgba(255,255,255,.6)}
+.eq-info .badge{
+  display:inline-block;padding:3px 10px;margin-top:6px;
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  color:#fff;font-size:10px;font-weight:800;border-radius:5px;letter-spacing:.4px;
+}
+
+/* ============ Component Cards ============ */
+.comp{
+  background:var(--surface);
+  border:1.5px solid var(--line);border-radius:14px;
+  margin-bottom:12px;overflow:hidden;
+  box-shadow:var(--shadow-1);position:relative;
+  transition:var(--transition);
+}
+.comp::before{
+  content:'';position:absolute;top:0;right:0;bottom:0;width:4px;
+  background:var(--ink-3);transition:var(--transition);
+}
+.comp.orange::before{background:var(--accent)}
+.comp.blue::before{background:var(--accent-2-c)}
+.comp.green::before{background:var(--ok)}
+.comp.yellow::before{background:var(--warn)}
+.comp.violet::before{background:var(--info)}
+.comp.on{box-shadow:var(--shadow-2);border-color:color-mix(in srgb,var(--accent) 30%, transparent)}
+.comp-head{
+  display:flex;align-items:center;gap:12px;padding:14px 16px;
+  cursor:pointer;transition:var(--transition);
+}
+.comp-head:hover{background:var(--surface-2)}
+.comp-icon{
+  width:44px;height:44px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--surface-2);border:1.5px solid var(--line);
+  border-radius:10px;transition:var(--transition);
+}
+.comp-icon svg{width:22px;height:22px;stroke:var(--ink-2);fill:none;stroke-width:2;transition:var(--transition)}
+.comp.on .comp-icon{background:linear-gradient(135deg,var(--accent),var(--accent-2));border-color:transparent;box-shadow:0 4px 12px var(--accent-glow)}
+.comp.on .comp-icon svg{stroke:#fff}
+.comp-title{flex:1;font-size:14px;font-weight:800;color:var(--ink-0)}
+.comp-badge{
+  font-family:var(--font-mono);font-size:14px;font-weight:800;
+  padding:5px 12px;border-radius:8px;display:none;
+}
+.comp.on .comp-badge{display:inline-block}
+.comp-badge.weight{
+  color:var(--accent-2);background:color-mix(in srgb,var(--accent) 12%, transparent);
+  border:1.5px solid color-mix(in srgb,var(--accent) 30%, transparent);
+}
+.comp-badge.cost{
+  color:#DB2777;background:#FDF2F8;border:1.5px solid #FBCFE8;
+}
+.comp-toggle{
+  position:relative;width:44px;height:24px;
+  background:var(--line);border-radius:24px;transition:var(--transition);
+  cursor:pointer;flex-shrink:0;
+}
+.comp-toggle::after{
+  content:'';position:absolute;top:2px;right:2px;
+  width:18px;height:18px;border-radius:50%;
+  background:var(--surface);box-shadow:var(--shadow-1);
+  transition:var(--transition);
+}
+.comp.on .comp-toggle{background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+.comp.on .comp-toggle::after{right:22px}
+.comp-body{display:none;padding:16px;border-top:1px solid var(--line-soft);background:var(--surface-2)}
+.comp.on .comp-body{display:block;animation:panelIn .3s var(--ease)}
+
+/* ============ Fields Grid ============ */
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.fld{display:flex;flex-direction:column;gap:6px}
+.fld label{font-size:11px;font-weight:700;color:var(--ink-2);letter-spacing:.3px}
+.fld input,.fld select{
+  width:100%;padding:11px 12px;
+  background:var(--surface);border:1.5px solid var(--line);
+  border-radius:9px;color:var(--ink-0);
+  font-family:var(--font-mono);font-size:15px;font-weight:700;
+  transition:var(--transition);-webkit-appearance:none;appearance:none;
+}
+.fld select{font-family:var(--font);font-size:13px;font-weight:700;
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E04E00' stroke-width='2.5'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");
+  background-repeat:no-repeat;background-position:left 12px center;background-size:12px;
+  padding-left:34px;cursor:pointer;
+}
+.fld input:focus,.fld select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.fld-hint{font-size:10.5px;color:var(--ink-3);line-height:1.5}
+.fld-hint b{color:var(--ok-2)}
+
+/* ============ Compare ============ */
+.compare-wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:14px}
+.compare-col{
+  background:var(--surface);border:1.5px solid var(--line);
+  border-radius:14px;padding:16px;position:relative;overflow:hidden;
+  transition:var(--transition);
+}
+.compare-col::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--ink-3);
+}
+.compare-col.best-col::before{background:linear-gradient(90deg,var(--ok),var(--ok-2))}
+.compare-col.best-col{
+  border:2px solid var(--ok);
+  background:linear-gradient(135deg,
+    color-mix(in srgb,var(--ok) 8%, var(--surface)),
+    color-mix(in srgb,var(--ok) 4%, var(--surface)));
+  box-shadow:0 8px 24px var(--ok-glow);
+}
+.compare-col h4{
+  margin:0 0 12px;font-size:13px;font-weight:800;color:var(--ink-0);
+  text-align:center;padding-bottom:10px;border-bottom:1.5px solid var(--line-soft);
+}
+.compare-row{
+  display:flex;justify-content:space-between;padding:8px 0;font-size:12.5px;
+  border-bottom:1px dashed var(--line-soft);
+}
+.compare-row:last-child{border-bottom:none}
+.compare-row .lbl{color:var(--ink-3);font-weight:600}
+.compare-row .val{font-family:var(--font-mono);font-weight:800;color:var(--ink-0);font-size:14px}
+.compare-col.best-col .compare-row .val{color:var(--ok-2)}
+
+/* ============ Auto-Save Badge ============ */
+.auto-save-badge{
+  position:fixed;bottom:24px;left:24px;z-index:99;
+  background:linear-gradient(135deg,var(--ok),var(--ok-2));
+  color:#fff;padding:10px 18px;border-radius:24px;
+  font-size:11.5px;font-weight:800;letter-spacing:.3px;
+  box-shadow:0 8px 24px var(--ok-glow), inset 0 1px 0 rgba(255,255,255,.25);
+  opacity:0;transform:translateY(20px) scale(.9);pointer-events:none;
+  transition:all .4s var(--ease-bounce);
+}
+.auto-save-badge.show{opacity:1;transform:translateY(0) scale(1)}
+
+/* ============ Empty State ============ */
+.empty-state{
+  text-align:center;padding:48px 20px;color:var(--ink-3);font-size:13px;
+}
+.empty-state::before{
+  content:"📭";display:block;font-size:48px;margin-bottom:14px;opacity:.4;
+}
+
+/* ============ Price Editor ============ */
+.price-section-title{
+  color:var(--accent-2);font-size:13px;margin:20px 0 10px;font-weight:800;
+  padding-bottom:8px;border-bottom:2px solid var(--line-soft);
+  display:flex;align-items:center;gap:8px;
+}
+.price-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;border-bottom:1px dashed var(--line-soft);gap:12px;
+}
+.price-row:last-child{border-bottom:none}
+.price-row label{font-size:12.5px;color:var(--ink-2);flex:1;font-weight:600}
+.price-row input{
+  width:160px;padding:9px 12px;
+  border:1.5px solid var(--line);border-radius:9px;
+  font-size:14px;text-align:left;direction:ltr;
+  background:var(--surface);color:var(--ink-0);
+  font-weight:800;font-family:var(--font-mono);
+}
+.price-row input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+
+/* ============ Save Row ============ */
+.save-row{
+  display:flex;gap:10px;align-items:center;padding:12px 0;
+  border-bottom:1px dashed var(--line-soft);
+}
+.save-row:last-child{border-bottom:none}
+.save-row .info{flex:1;font-size:12.5px;line-height:1.7}
+.save-row .info b{color:var(--accent-2);font-family:var(--font-mono)}
+.save-row button{
+  padding:7px 14px;border-radius:8px;
+  border:1.5px solid color-mix(in srgb,var(--err) 30%, transparent);
+  font-family:inherit;font-weight:700;cursor:pointer;font-size:11.5px;
+  background:color-mix(in srgb,var(--err) 8%, transparent);
+  color:var(--err-2);transition:var(--transition);
+}
+.save-row button:hover{background:color-mix(in srgb,var(--err) 16%, transparent);transform:scale(1.05)}
+
+/* ============ QR Box ============ */
+.qr-box{
+  display:flex;align-items:center;justify-content:center;
+  background:#fff;border:1.5px solid var(--line);
+  border-radius:12px;padding:16px;margin:12px 0;
+  flex-direction:column;gap:10px;
+}
+.qr-box svg,.qr-box img{max-width:200px}
+
+/* ============ Footnote ============ */
+.footnote{
+  font-size:11px;color:var(--ink-3);text-align:center;
+  margin-top:32px;line-height:1.9;padding:24px 16px;
+  border-top:1px solid var(--line-soft);max-width:1180px;margin-left:auto;margin-right:auto;
+}
+
+/* ============ Scrollbar ============ */
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px;border:2px solid var(--bg-0)}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+/* ============ Range Slider ============ */
+input[type=range]{
+  width:100%;height:6px;border-radius:3px;
+  background:var(--line);outline:none;
+  -webkit-appearance:none;appearance:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:22px;height:22px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  box-shadow:0 2px 8px var(--accent-glow);cursor:pointer;
+}
+</style>
+<link rel="stylesheet" href="theme.css">
+<style>
+/* Caspian neon remap — تبدیل کامل به تم نئونی */
+:root,[data-theme="dark"]{
+  --bg-0:var(--bg-base);--bg-1:var(--bg-surface);--bg-2:var(--bg-elevated);
+  --surface:var(--bg-surface);--surface-2:var(--bg-elevated);--surface-3:var(--bg-input);
+  --ink-0:var(--text);--ink-1:var(--text);--ink-2:var(--text-mid);--ink-3:var(--text-dim);--ink-4:var(--text-dim);
+  --line-soft:var(--border);--line:var(--border-strong);--line-hi:var(--gold);
+  --accent:var(--gold);--accent-2:var(--gold-dim);--accent-glow:var(--gold-glow);
+  --accent-2-c:var(--cyan);--accent-2-glow:var(--cyan-glow);
+  --ok:var(--mint);--ok-2:var(--mint-dim);--ok-glow:var(--mint-glow);
+  --warn:var(--amber);--warn-2:var(--amber);
+  --err:var(--danger);--err-2:var(--coral-dim);
+  --info:var(--purple);--info-2:var(--purple-dim);
+  --glass:var(--bg-surface);--glass-border:var(--border);
+}
+#themeToggle{display:none!important;}
+/* تب‌های مدرن (پیل به‌جای فایل‌تب) */
+.tabs{padding:8px 16px;gap:6px;}
+.tab{background:var(--surface);border:1.5px solid var(--line);border-radius:99px;padding:9px 16px;}
+.tab::after{display:none;}
+.tab:hover{color:var(--accent);border-color:var(--accent);background:var(--surface);}
+.tab.active{color:#1a1205;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-color:transparent;box-shadow:0 4px 14px var(--accent-glow);}
+/* ریسپانسیو: روی دسکتاپ عریض‌تر */
+@media(min-width:1400px){header,main,.tabs,.footnote{max-width:1600px;}}
+</style>
+<script src="bridge.js"></script>
+</head>
+<body>
+
+<div class="sticky-top">
+  <header>
+    <div class="brand">
+      <div class="logo-mark">
+        <img id="logo-img" alt="Logo" src="icon-192.png">
+      </div>
+      <div class="brand-text">
+        <h1>Pressure Tank Calculator</h1>
+        <p class="sub">Caspian Mobadel Amard — v7</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="themeToggle" onclick="toggleTheme()" title="تغییر تم">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <path id="themeIcon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+  <div class="tabs">
+    <button class="tab active" data-tab="t1">📦 حجم</button>
+    <button class="tab" data-tab="t2">📐 ابعاد و حجم</button>
+    <button class="tab" data-tab="t3">📄 ورق</button>
+    <button class="tab" data-tab="t4">⚖️ وزن‌دهی</button>
+    <button class="tab" data-tab="t5">💰 قیمت‌گذاری</button>
+    <button class="tab" data-tab="t6">🔵 عدسی</button>
+    <button class="tab" data-tab="t7">🌀 کویل</button>
+    <button class="tab" data-tab="t8">🎯 سفارش مشتری</button>
+    <button class="tab" data-tab="t12">🔬 ASME</button>
+    <button class="tab" data-tab="t13">⚙️ کارگاه</button>
+    <button class="tab" data-tab="t14">👁 بصری</button>
+    <button class="tab" data-tab="t9">💾 حافظه</button>
+    <button class="tab" data-tab="t10">📊 قیمت‌ها</button>
+    <button class="tab" data-tab="t11">📚 کاتالوگ</button>
+  </div>
+</div>
+
+<main>
+
+<!-- ============ تب ۱: حجم ============ -->
+<div id="t1" class="panel active">
+  <div class="card orange">
+    <h2>محاسبه حجم</h2>
+    <div class="field">
+      <label>نوع مخزن</label>
+      <select id="v-type" onchange="onVolumeTypeChange()">
+        <option value="cyl-dish">استوانه با دو عدسی</option>
+        <option value="cyl-flat">استوانه سر تخت</option>
+        <option value="box">مکعبی ساده</option>
+      </select>
+    </div>
+    <div class="row">
+      <div class="field"><label>قطر (mm)</label><input type="number" id="v-d" step="1"></div>
+      <div class="field" id="f-v-h"><label>ارتفاع جوش تا جوش (mm)</label><input type="number" id="v-h" step="1"></div>
+      <div class="field" id="f-v-l" style="display:none"><label>طول (mm)</label><input type="number" id="v-l" step="10"></div>
+      <div class="field" id="f-v-w" style="display:none"><label>عرض (mm)</label><input type="number" id="v-w" step="10"></div>
+    </div>
+    <div id="v-schematic"></div>
+    <button class="btn" onclick="calcVol()">محاسبه</button>
+    <button class="btn green" onclick="saveLastVolume()" style="margin-top:8px">💾 ذخیره سریع</button>
+    <div id="v-res"></div>
+  </div>
+</div>
+
+<!-- ============ تب ۲: ابعاد و حجم دوگانه ============ -->
+<div id="t2" class="panel">
+  <div class="card blue">
+    <h2>ابعاد و حجم (دوگانه)</h2>
+
+    <div class="mode-tabs">
+      <button class="mode-tab active" data-mode="A" onclick="setDimMode('A')">ظرفیت → ابعاد</button>
+      <button class="mode-tab" data-mode="B" onclick="setDimMode('B')">ابعاد → ظرفیت</button>
+    </div>
+
+    <!-- حالت A -->
+    <div id="dim-fields-A" class="mode-body active">
+      <div class="field"><label>ظرفیت (لیتر)</label><input type="number" id="d-v" step="1"></div>
+      <div class="field"><label>نوع مخزن</label>
+        <select id="d-type" onchange="toggleDimMode()">
+          <option value="cyl-dish">استوانه با عدسی</option>
+          <option value="cyl-flat">استوانه سر تخت</option>
+          <option value="box">مکعبی ساده</option>
+        </select>
+      </div>
+      <div id="dim-cyl-fields">
+        <div class="row">
+          <div class="field"><label>قطر (mm) — اختیاری</label><input type="number" id="d-d" step="1"></div>
+          <div class="field"><label>ارتفاع (mm) — اختیاری</label><input type="number" id="d-h" step="1"></div>
+        </div>
+      </div>
+      <div id="dim-box-fields" style="display:none">
+        <div class="info-box" style="margin-bottom:10px">
+          <b>مکعبی ساده:</b> طول × عرض × ارتفاع — بدون خم وسط. اگر خالی بگذاری، نسبت بهینه ۱:۱:۱.۵ پیشنهاد می‌شود.
+        </div>
+        <div class="row">
+          <div class="field"><label>طول (mm) — اختیاری</label><input type="number" id="d-box-l" step="10" placeholder="خالی = هوشمند"></div>
+          <div class="field"><label>عرض (mm) — اختیاری</label><input type="number" id="d-box-w" step="10" placeholder="خالی"></div>
+        </div>
+        <div class="field"><label>ارتفاع (mm) — اختیاری</label><input type="number" id="d-box-h" step="10" placeholder="خالی"></div>
+      </div>
+      <button class="btn blue" onclick="calcDim()">محاسبه ابعاد</button>
+      <div id="d-res"></div>
+    </div>
+
+    <!-- حالت B -->
+    <div id="dim-fields-B" class="mode-body">
+      <div class="info-box" style="margin-bottom:12px">
+        <b>🆕 ابعاد دادی → لیتر بگیر</b> — برای سختی‌گیر، فیلتر شنی، دی‌اریتور و هر تجهیزی که ابعادش را می‌دانی.
+      </div>
+      <div class="field"><label>نوع مخزن</label>
+        <select id="d2-type" onchange="toggleDimMode2()">
+          <option value="cyl-dish">استوانه با دو عدسی</option>
+          <option value="cyl-flat">استوانه سر تخت</option>
+          <option value="box">مکعبی ساده</option>
+        </select>
+      </div>
+      <div id="dim2-cyl-fields">
+        <div class="row">
+          <div class="field"><label>قطر داخلی (mm)</label><input type="number" id="d2-d" step="1"></div>
+          <div class="field"><label>ارتفاع جوش تا جوش (mm)</label><input type="number" id="d2-h" step="1"></div>
+        </div>
+      </div>
+      <div id="dim2-box-fields" style="display:none">
+        <div class="row3">
+          <div class="field"><label>طول (mm)</label><input type="number" id="d2-l" step="10"></div>
+          <div class="field"><label>عرض (mm)</label><input type="number" id="d2-w" step="10"></div>
+          <div class="field"><label>ارتفاع (mm)</label><input type="number" id="d2-h-box" step="10"></div>
+        </div>
+      </div>
+      <button class="btn green" onclick="calcVolFromDims()">محاسبه حجم</button>
+      <button class="btn small" onclick="transferVolToDim()" style="margin-top:6px">⬆️ انتقال به حالت A</button>
+      <div id="d2-res"></div>
+      <div id="d2-schematic"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ تب ۳: بهینه‌سازی ورق ============ -->
+<div id="t3" class="panel">
+  <div class="card green">
+    <h2>بهینه‌سازی ورق</h2>
+    <div class="field"><label>ظرفیت (لیتر)</label><input type="number" id="s-v" step="1"></div>
+    <div class="row">
+      <div class="field"><label>عرض ورق (cm)</label>
+        <select id="s-w">
+          <option value="both">مقایسه ۱۵۰ و ۱۵۲</option>
+          <option value="150">۱۵۰</option>
+          <option value="152">۱۵۲</option>
+          <option value="custom">دستی</option>
+        </select>
+      </div>
+      <div class="field" id="s-custom-wrap" style="display:none"><label>عرض دستی (cm)</label><input type="number" id="s-w-custom" step="1" value="150"></div>
+      <div class="field"><label>طول ورق (mm)</label><input type="number" id="s-l" value="6000" step="100"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>حداکثر کورس</label><input type="number" id="s-max" value="10" min="1" max="20" step="1"></div>
+      <div class="field"><label>ارتفاع اجباری (mm) — اختیاری</label><input type="number" id="s-forced-h" step="10" placeholder="خالی"></div>
+    </div>
+    <button class="btn green" onclick="optSheets()">محاسبه</button>
+    <button class="btn blue" onclick="compareFourScenarios()" style="margin-top:8px">مقایسه ۴ سناریو</button>
+    <div id="s-res"></div>
+    <div id="cs-res"></div>
+  </div>
+</div>
+
+<!-- ============ تب ۴: وزن‌دهی ============ -->
+<div id="t4" class="panel">
+  <div class="eq-select">
+    <label>نوع تجهیز</label>
+    <select id="w-eq" onchange="loadEquipment('weight')">
+      <option value="spiral">منبع اسپیرال</option>
+      <option value="u_coil">منبع کوئلی U شکل</option>
+      <option value="softener">سختی‌گیر</option>
+      <option value="sand_filter">فیلتر شنی / کربنی</option>
+      <option value="deaerator">دی‌اریتور</option>
+      <option value="expansion_closed">منبع انبساط بسته</option>
+      <option value="expansion_open">منبع انبساط باز</option>
+      <option value="condensate">مخزن کندانس</option>
+    </select>
+    <div id="w-eq-header"></div>
+  </div>
+  <div id="w-components"></div>
+  <div class="card orange">
+    <button class="btn" onclick="calcWeight()">⚖️ محاسبه وزن کل</button>
+    <div class="row" style="margin-top:8px">
+      <button class="btn gray" onclick="exportPDF('weight')" style="margin-top:0">📄 PDF</button>
+      <button class="btn green" onclick="exportToExcel('weight')" style="margin-top:0">📊 CSV</button>
+    </div>
+    <div id="w-result"></div>
+  </div>
+</div>
+
+<!-- ============ تب ۵: قیمت‌گذاری ============ -->
+<div id="t5" class="panel">
+  <div class="eq-select">
+    <label>نوع تجهیز</label>
+    <select id="c-eq" onchange="loadEquipment('cost')">
+      <option value="spiral">منبع اسپیرال</option>
+      <option value="u_coil">منبع کوئلی U شکل</option>
+      <option value="softener">سختی‌گیر</option>
+      <option value="sand_filter">فیلتر شنی / کربنی</option>
+      <option value="deaerator">دی‌اریتور</option>
+      <option value="expansion_closed">منبع انبساط بسته</option>
+      <option value="expansion_open">منبع انبساط باز</option>
+      <option value="condensate">مخزن کندانس</option>
+    </select>
+    <div id="c-eq-header"></div>
+  </div>
+  <div id="c-components"></div>
+  <div class="card yellow">
+    <div class="field"><label>درصد سود و مالیات</label><input type="number" id="c-profit" value="25" step="1"></div>
+    <button class="btn" onclick="calcCost()">💰 محاسبه قیمت</button>
+    <div class="row" style="margin-top:8px">
+      <button class="btn gray" onclick="exportPDF('cost')" style="margin-top:0">📄 PDF</button>
+      <button class="btn green" onclick="exportToExcel('cost')" style="margin-top:0">📊 CSV</button>
+    </div>
+    <div id="c-result"></div>
+  </div>
+</div>
+
+<!-- ============ تب ۶: عدسی ============ -->
+<div id="t6" class="panel">
+  <div class="card violet">
+    <h2>📐 سطح گسترده عدسی</h2>
+
+    <div class="mode-tabs">
+      <button class="mode-tab active" data-mode="simple" onclick="setHeadMode('simple')">ساده</button>
+      <button class="mode-tab" data-mode="pro" onclick="setHeadMode('pro')">Plate & Sheet</button>
+      <button class="mode-tab" data-mode="real" onclick="setHeadMode('real')">ابعاد واقعی پرس</button>
+    </div>
+
+    <!-- حالت ساده -->
+    <div id="head-fields-simple" class="mode-body active">
+      <div class="field"><label>نوع عدسی</label>
+        <select id="h-type" onchange="applyHeadPreset()">
+          <option value="shallow">کم‌عمق صنعتی (D/15)</option>
+          <option value="torisph">تورسفریکال (0.194D)</option>
+          <option value="ellip">بیضوی (0.25D)</option>
+          <option value="hemi">نیم‌کره (0.5D)</option>
+          <option value="custom">دستی</option>
+        </select>
+      </div>
+      <div class="row">
+        <div class="field"><label>قطر داخلی (mm)</label><input type="number" id="h-d" step="1" oninput="applyHeadPreset()" placeholder="750"></div>
+        <div class="field"><label>طول لبه (mm)</label><input type="number" id="h-l" step="1" value="40"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>گودی h (mm)</label><input type="number" id="h-h" step="1"></div>
+        <div class="field"><label>ضخامت (mm)</label><input type="number" id="h-t" step="0.1" value="6"></div>
+      </div>
+      <div class="field"><label>جنس ورق</label>
+        <select id="h-mat">
+          <option value="ST37">ST37</option>
+          <option value="S235JR">S235JR</option>
+          <option value="A516-70">A516 Gr70</option>
+          <option value="Galvanized">گالوانیزه</option>
+          <option value="SS304">استیل ۳۰۴</option>
+          <option value="SS316">استیل ۳۱۶</option>
+        </select>
+      </div>
+      <button class="btn violet" onclick="calcBlankHandler()">محاسبه</button>
+      <button class="btn green small" onclick="saveHeadCalc()" style="margin-top:6px">💾 ذخیره</button>
+      <div id="h-res"></div>
+    </div>
+
+    <!-- حالت Plate & Sheet -->
+    <div id="head-fields-pro" class="mode-body">
+      <div class="info-box violet" style="margin-bottom:12px">
+        <b>Plate & Sheet:</b> Blank + Springback + تعداد مرحله پرس + Nesting + DXF
+      </div>
+      <div class="row">
+        <div class="field"><label>قطر داخلی (mm)</label><input type="number" id="hp-d" step="1"></div>
+        <div class="field"><label>گودی h (mm)</label><input type="number" id="hp-h" step="1"></div>
+      </div>
+      <div class="row3">
+        <div class="field"><label>ضخامت (mm)</label><input type="number" id="hp-t" step="0.1" value="6"></div>
+        <div class="field"><label>جنس</label>
+          <select id="hp-mat">
+            <option value="ST37">ST37</option>
+            <option value="S235JR">S235JR</option>
+            <option value="A516-70">A516 Gr70</option>
+            <option value="SS304">استیل ۳۰۴</option>
+            <option value="SS316">استیل ۳۱۶</option>
+          </select>
+        </div>
+        <div class="field"><label>نوع عدسی</label>
+          <select id="hp-type">
+            <option value="torisph">تورسفریکال</option>
+            <option value="ellip">بیضوی 2:1</option>
+            <option value="hemi">نیم‌کره</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field"><label>طول لبه (mm)</label><input type="number" id="hp-l" step="1" value="40"></div>
+        <div class="field"><label>عرض ورق (mm)</label><input type="number" id="hp-sheet-w" value="1500" step="100"></div>
+      </div>
+      <div class="field"><label>طول ورق (mm)</label><input type="number" id="hp-sheet-l" value="6000" step="100"></div>
+      <button class="btn violet" onclick="calcHeadPlateSheet()">محاسبه Plate & Sheet</button>
+      <div id="hp-res"></div>
+    </div>
+
+    <!-- حالت ابعاد واقعی -->
+    <div id="head-fields-real" class="mode-body">
+      <div class="info-box violet" style="margin-bottom:12px">
+        <b>📌 ثبت ابعاد پس از پرس دستی</b> — طراحی + واقعی، Springback خودکار محاسبه و در حافظه ذخیره می‌شود
+      </div>
+      <div class="section-title">اطلاعات طراحی</div>
+      <div class="row">
+        <div class="field"><label>D طراحی (mm)</label><input type="number" id="rh-d-design" value="1600"></div>
+        <div class="field"><label>h طراحی (mm)</label><input type="number" id="rh-h-design" value="107"></div>
+      </div>
+      <div class="section-title">اطلاعات واقعی پس از پرس</div>
+      <div class="row">
+        <div class="field"><label>D واقعی (mm)</label><input type="number" id="rh-d-actual" placeholder="1597"></div>
+        <div class="field"><label>h واقعی (mm)</label><input type="number" id="rh-h-actual" placeholder="112"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>طول لبه واقعی (mm)</label><input type="number" id="rh-l-actual" value="40"></div>
+        <div class="field"><label>ضخامت واقعی (mm)</label><input type="number" id="rh-t-actual" value="8" step="0.1"></div>
+      </div>
+      <button class="btn violet" onclick="calcRealHead()">محاسبه Springback واقعی</button>
+      <div id="rh-res"></div>
+    </div>
+  </div>
+
+  <!-- Segmented Head -->
+  <div class="card blue">
+    <h2>🥧 عدسی قاچ‌قاچ (Segmented)</h2>
+    <div class="info-box" style="margin-bottom:12px">
+      <b>کاربرد:</b> وقتی عدسی خیلی بزرگ است و یکجا پرس نمی‌شود.
+    </div>
+    <div class="row">
+      <div class="field"><label>قطر داخلی (mm)</label><input type="number" id="sh-d" step="1" placeholder="3000"></div>
+      <div class="field"><label>گودی h (mm)</label><input type="number" id="sh-h" step="1" placeholder="400"></div>
+    </div>
+    <div class="row3">
+      <div class="field"><label>تعداد قاچ</label>
+        <select id="sh-n">
+          <option value="4">۴ قاچ</option>
+          <option value="6">۶ قاچ</option>
+          <option value="8" selected>۸ قاچ</option>
+          <option value="12">۱۲ قاچ</option>
+          <option value="16">۱۶ قاچ</option>
+          <option value="24">۲۴ قاچ</option>
+          <option value="32">۳۲ قاچ</option>
+        </select>
+      </div>
+      <div class="field"><label>طول لبه (mm)</label><input type="number" id="sh-l" value="40" step="1"></div>
+      <div class="field"><label>ضخامت (mm)</label><input type="number" id="sh-t" value="8" step="0.1"></div>
+    </div>
+    <button class="btn blue" onclick="calcSegmentedHead()">محاسبه قاچ‌قاچ</button>
+    <button class="btn small" onclick="exportSegmentedSVG()" style="margin-top:6px">⬇️ دانلود SVG</button>
+    <div id="sh-res"></div>
+    <div id="sh-schematic"></div>
+  </div>
+
+  <!-- Body Height -->
+  <div class="card blue">
+    <h2>محاسبه‌گر ارتفاع بدنه</h2>
+    <div class="row">
+      <div class="field"><label>ارتفاع کل (mm)</label><input type="number" id="ht-total" step="10" value="3000"></div>
+      <div class="field"><label>گودی هر عدسی (mm)</label><input type="number" id="ht-dish" step="5" value="107"></div>
+    </div>
+    <div class="field"><label>تعداد عدسی</label>
+      <select id="ht-ndish">
+        <option value="2" selected>۲ عدد</option>
+        <option value="1">۱ عدد</option>
+        <option value="0">بدون عدسی</option>
+      </select>
+    </div>
+    <button class="btn blue" onclick="calcBodyHeightFromTotal()">محاسبه</button>
+    <div id="ht-res"></div>
+  </div>
+</div>
+
+<!-- ============ تب ۷: کویل پیشرفته ============ -->
+<div id="t7" class="panel">
+  <div class="card green">
+    <h2>🌀 طراحی کویل پیشرفته</h2>
+
+    <div class="field"><label>نوع کویل</label>
+      <select id="coil-type" onchange="updateCoilDesign()">
+        <option value="helical">هلیکال پیوسته</option>
+        <option value="multi_start">مولتی‌استارت (چند راه)</option>
+        <option value="double_helix">دابل هلیکس</option>
+      </select>
+    </div>
+
+    <div class="section-title">هندسه</div>
+    <div class="row">
+      <div class="field"><label>قطر مخزن (mm)</label><input type="number" id="coil-Dtank" value="1400" step="50"></div>
+      <div class="field"><label>ارتفاع بدنه (mm)</label><input type="number" id="coil-Htank" value="2000" step="50"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>گودی عدسی (mm)</label><input type="number" id="coil-dish" value="100" step="5"></div>
+      <div class="field"><label>فاصله از جوش (mm)</label><input type="number" id="coil-clear" value="100" step="10"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>قطر کویل (mm)</label><input type="number" id="coil-Dcoil" value="1200" step="50"></div>
+      <div class="field"><label>سایز لوله</label>
+        <select id="coil-pipe">
+          <option value="26.67">۳/۴" (26.67)</option>
+          <option value="33.40" selected>۱" (33.40)</option>
+          <option value="42.16">۱ ۱/۴" (42.16)</option>
+          <option value="48.26">۱ ۱/۲" (48.26)</option>
+          <option value="60.33">۲" (60.33)</option>
+        </select>
+      </div>
+    </div>
+    <div class="row3">
+      <div class="field"><label>تعداد شاخه</label><input type="number" id="coil-branches" value="4" step="1" min="1"></div>
+      <div class="field"><label>گام (mm) — ۰=چسبیده</label><input type="number" id="coil-gap" value="0" step="1" min="0"></div>
+      <div class="field"><label>تعداد استارت</label>
+        <select id="coil-starts">
+          <option value="1">۱ (تک راه)</option>
+          <option value="2">۲</option>
+          <option value="3">۳</option>
+          <option value="4">۴</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn green" onclick="updateCoilDesign()">محاسبه کویل</button>
+    <button class="btn small" onclick="saveCoilDesign()" style="margin-top:6px">💾 ذخیره</button>
+
+    <div class="schematic" id="coil-schematic"></div>
+    <div id="coil-info"></div>
+    <div id="coil-warning"></div>
+  </div>
+</div>
+
+<!-- ============ تب ۸: سفارش مشتری ============ -->
+<div id="t8" class="panel">
+  <div class="card green">
+    <h2>🎯 محاسبه‌گر سفارش مشتری</h2>
+    <div class="mode-tabs">
+      <button class="mode-tab active" data-mode="A" onclick="setOrderMode('A')">ظرفیت → ابعاد</button>
+      <button class="mode-tab" data-mode="B" onclick="setOrderMode('B')">ارتفاع → قطر</button>
+      <button class="mode-tab" data-mode="C" onclick="setOrderMode('C')">قطر → ارتفاع</button>
+    </div>
+    <div class="field"><label>ظرفیت (لیتر)</label><input type="number" id="ro-v" step="1" placeholder="7000"></div>
+
+    <div id="ro-fields-A" class="mode-body active">
+      <div class="field"><label>عرض ورق (cm)</label>
+        <select id="ro-w-a"><option value="150">۱۵۰</option><option value="152">۱۵۲</option><option value="custom">دستی</option></select>
+      </div>
+      <div class="field" id="ro-w-a-custom-wrap" style="display:none"><label>عرض دستی (cm)</label><input type="number" id="ro-w-a-custom" value="150" step="1"></div>
+    </div>
+
+    <div id="ro-fields-B" class="mode-body">
+      <div class="row">
+        <div class="field"><label>ارتفاع درخواستی (mm)</label><input type="number" id="ro-h" step="10" placeholder="3000"></div>
+        <div class="field"><label>عرض ورق (cm)</label>
+          <select id="ro-w-b"><option value="150">۱۵۰</option><option value="152">۱۵۲</option><option value="custom">دستی</option></select>
+        </div>
+      </div>
+      <div class="field" id="ro-w-b-custom-wrap" style="display:none"><label>عرض دستی (cm)</label><input type="number" id="ro-w-b-custom" value="150" step="1"></div>
+    </div>
+
+    <div id="ro-fields-C" class="mode-body">
+      <div class="row">
+        <div class="field"><label>قطر درخواستی (mm)</label><input type="number" id="ro-d" step="10" placeholder="1600"></div>
+        <div class="field"><label>عرض ورق (cm)</label>
+          <select id="ro-w-c"><option value="150">۱۵۰</option><option value="152">۱۵۲</option><option value="custom">دستی</option></select>
+        </div>
+      </div>
+      <div class="field" id="ro-w-c-custom-wrap" style="display:none"><label>عرض دستی (cm)</label><input type="number" id="ro-w-c-custom" value="150" step="1"></div>
+    </div>
+
+    <button class="btn green" onclick="calcOrderReverse()">محاسبه</button>
+    <div id="ro-res"></div>
+  </div>
+</div>
+
+<!-- ============ تب ۱۲: ASME ============ -->
+<div id="t12" class="panel">
+  <div class="card violet">
+    <h2>🔬 محاسبات ASME VIII Div.1</h2>
+    <div class="info-box violet" style="margin-bottom:14px">
+      محاسبه ضخامت پوسته (UG-27)، ضخامت عدسی (UG-32)، MAWP و Hydrotest
+    </div>
+    <div class="row">
+      <div class="field"><label>فشار طراحی (bar)</label><input type="number" id="asme-p" value="6" step="0.5"></div>
+      <div class="field"><label>قطر داخلی (mm)</label><input type="number" id="asme-d" value="1600" step="10"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>ضخامت فعلی (mm)</label><input type="number" id="asme-t" value="6" step="0.5"></div>
+      <div class="field"><label>خوردگی (mm)</label><input type="number" id="asme-ca" value="1.5" step="0.5"></div>
+    </div>
+    <div class="row3">
+      <div class="field"><label>جنس</label>
+        <select id="asme-mat">
+          <option value="ST37">ST37</option>
+          <option value="S235JR">S235JR</option>
+          <option value="A516-70">A516 Gr70</option>
+          <option value="SS304">SS304</option>
+          <option value="SS316">SS316</option>
+        </select>
+      </div>
+      <div class="field"><label>راندمان جوش E</label>
+        <select id="asme-e">
+          <option value="1.0">۱.۰ (RT کامل)</option>
+          <option value="0.85" selected>۰.۸۵ (نمونه‌ای)</option>
+          <option value="0.7">۰.۷ (بدون RT)</option>
+        </select>
+      </div>
+      <div class="field"><label>نوع عدسی</label>
+        <select id="asme-head-type">
+          <option value="torisph">تورسفریکال</option>
+          <option value="ellip">بیضوی 2:1</option>
+          <option value="hemi">نیم‌کره</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field"><label>دمای طراحی (°C)</label><input type="number" id="asme-temp" value="80"></div>
+      <div class="field"><label>تنش مجاز S (MPa) — خالی = خودکار</label><input type="number" id="asme-s" step="1"></div>
+    </div>
+    <button class="btn violet" onclick="calcASME()">🔬 محاسبه ASME</button>
+    <div id="asme-res"></div>
+  </div>
+</div>
+
+<!-- ============ تب ۱۳: کارگاه ============ -->
+<div id="t13" class="panel">
+  <div class="card green">
+    <h2>⚙️ هوشمندی کارگاهی</h2>
+    <div class="info-box green" style="margin-bottom:14px">
+      محاسبه زمان جوش، Heat Input، PWHT، توالی جوش و چک‌لیست کیفیت
+    </div>
+    <div class="row">
+      <div class="field"><label>ضخامت پوسته (mm)</label><input type="number" id="wi-t" value="8" step="0.5"></div>
+      <div class="field"><label>قطر (mm)</label><input type="number" id="wi-d" value="1600"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>طول جوش (mm)</label><input type="number" id="wi-weld-len" value="5000" step="100"></div>
+      <div class="field"><label>نوع اتصال</label>
+        <select id="wi-joint">
+          <option value="butt">لب‌به‌لب (Butt)</option>
+          <option value="fillet">گوشه (Fillet)</option>
+          <option value="tjoint">T-Joint</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>جنس</label>
+      <select id="wi-mat">
+        <option value="ST37">ST37</option>
+        <option value="A516-70">A516 Gr70</option>
+        <option value="SS304">SS304</option>
+        <option value="SS316">SS316</option>
+      </select>
+    </div>
+    <button class="btn green" onclick="calcWorkshopIntelligence()">⚙️ تحلیل کارگاهی</button>
+    <div id="wi-res"></div>
+  </div>
+</div>
+
+<!-- ============ تب ۱۴: بصری ============ -->
+<div id="t14" class="panel">
+  <div class="card blue">
+    <h2>👁 نمایش بصری پیشرفته</h2>
+    <div class="mode-tabs">
+      <button class="mode-tab active" data-mode="3d" onclick="setVisualMode('3d')">نمای ۳بعدی</button>
+      <button class="mode-tab" data-mode="cross" onclick="setVisualMode('cross')">نمای برش</button>
+      <button class="mode-tab" data-mode="anim" onclick="setVisualMode('anim')">مراحل ساخت</button>
+    </div>
+    <div class="row3">
+      <div class="field"><label>Dtank (mm)</label><input type="number" id="vis-Dtank" value="1400" step="50"></div>
+      <div class="field"><label>Htank (mm)</label><input type="number" id="vis-Htank" value="2000" step="50"></div>
+      <div class="field"><label>Dcoil (mm)</label><input type="number" id="vis-Dcoil" value="1200" step="50"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>تعداد دور</label><input type="number" id="vis-turns" value="13" step="0.5"></div>
+      <div class="field"><label>موقعیت برش %</label><input type="range" id="vis-slider" min="10" max="90" value="50"></div>
+    </div>
+    <div class="row" id="rotateBtns">
+      <button class="btn small gray" onclick="rotate3D(-15)" style="margin-top:0">↺ چرخش -15°</button>
+      <button class="btn small gray" onclick="rotate3D(15)" style="margin-top:0">↻ چرخش +15°</button>
+    </div>
+    <div class="schematic" id="vis-schematic" style="min-height:450px"></div>
+  </div>
+</div>
+
+<!-- ============ تب ۹: حافظه ============ -->
+<div id="t9" class="panel">
+  <div class="card">
+    <h2>💾 حافظه محاسبات</h2>
+    <div id="mem-list"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn gray" onclick="exportMemory()" style="margin-top:0">⬇️ CSV</button>
+      <button class="btn red" onclick="clearMemory()" style="margin-top:0">🗑 پاک</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ تب ۱۰: قیمت‌ها ============ -->
+<div id="t10" class="panel">
+  <div class="card yellow">
+    <h2>📊 ویرایش قیمت‌ها و تنظیمات کارگاه</h2>
+    <div class="row">
+      <button class="btn blue" onclick="syncFromFirebase()">📥 دریافت از Cloud</button>
+      <button class="btn orange" onclick="syncToFirebase()">📤 ارسال به Cloud</button>
+    </div>
+    <div id="price-status"></div>
+    <div id="price-editor"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn green" onclick="savePricesLocal(true)" style="margin-top:0">💾 ذخیره</button>
+      <button class="btn gray" onclick="resetPrices()" style="margin-top:0">↺ بازگشت</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ تب ۱۱: کاتالوگ ============ -->
+<div id="t11" class="panel">
+  <div class="card orange">
+    <h2>📚 کاتالوگ محصولات</h2>
+    <div class="field"><label>دسته‌بندی</label><select id="cat-category" onchange="renderCatalog()"></select></div>
+    <div class="field"><label>🔍 جستجو</label><input type="text" id="cat-search" placeholder="مثلاً 3000" oninput="renderCatalog()"></div>
+    <div id="cat-info"></div>
+    <div id="cat-table"></div>
+  </div>
+</div>
+
+<p class="footnote">
+  ASME Sec VIII Div 1 — UG-27 / UG-32<br>
+  محاسبات پیش‌طراحی است؛ نقشه مهندسی الزامی است.<br>
+  Caspian Mobadel Amard — Pressure Tank Calculator v7.0
+</p>
+</main>
+
+<div class="auto-save-badge" id="autoSaveBadge">💾 ذخیره خودکار</div>
+
+<script src="firebase-config.js"></script>
+<script src="prices.js"></script>
+<script src="catalog.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
