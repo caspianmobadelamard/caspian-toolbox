@@ -156,6 +156,9 @@
       </div>
     </div>
     <div class="top-actions">
+      <button class="icon-btn" id="installBtn" onclick="installApp()" title="نصب برنامه" style="display:none;">
+        <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+      </button>
       <button class="icon-btn" id="updateBtn" onclick="openSettings('update')" title="بروزرسانی" style="position:relative;">
         <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>
         <span class="dot" id="updateDot"></span>
@@ -472,6 +475,24 @@ function checkUpdate() {
       status.textContent = 'خطا در بررسی بروزرسانی — آدرس version.json را بررسی کنید.';
       toast('بررسی بروزرسانی ناموفق بود', 'err');
     });
+}
+
+/* ===== نصب برنامه (PWA) ===== */
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const btn = document.getElementById('installBtn');
+  if (btn) btn.style.display = 'flex';
+});
+function installApp() {
+  const btn = document.getElementById('installBtn');
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; if (btn) btn.style.display = 'none'; });
+  } else {
+    toast('نصب: اندروید/دسکتاپ → منوی مرورگر «Add to Home Screen» · آیفون → Safari → Share → Add to Home Screen', 'info');
+  }
 }
 
 /* ===== Service Worker ===== */
