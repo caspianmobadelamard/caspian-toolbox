@@ -2810,10 +2810,10 @@ window.calcRealHead = calcRealHead;
    ============================================================ */
 const NORD_LS = 'csp_nord';
 const NORD_DEFAULTS = [
-  { id:'shell', name:'نورد پوسته', dLabel:'قطر شبکه (mm)', d:1400, t:6, formula:'D + t + 4' },
-  { id:'furnace', name:'نورد کوره', dLabel:'قطر کوره روی شبکه (mm)', d:1200, t:6, formula:'D - t - 4' },
-  { id:'chamber', name:'نورد چمبر', dLabel:'قطر داخلی (mm)', d:1300, t:6, formula:'D + t + 4' },
-  { id:'access', name:'نورد اکسس', dLabel:'قطر شبکه (mm)', d:1400, t:6, formula:'D - 4 - t' }
+  { id:'shell', name:'نورد پوسته', dLabel:'قطر شبکه (mm)', d:1400, t:6, formula:'(D + t + 4) * 3.14' },
+  { id:'furnace', name:'نورد کوره', dLabel:'قطر کوره روی شبکه (mm)', d:1200, t:6, formula:'(D - t - 4) * 3.14' },
+  { id:'chamber', name:'نورد چمبر', dLabel:'قطر داخلی (mm)', d:1300, t:6, formula:'(D + t + 4) * 3.14' },
+  { id:'access', name:'نورد اکسس', dLabel:'قطر شبکه (mm)', d:1400, t:6, formula:'(D - 4 - t) * 3.14' }
 ];
 function nordLoadLocal(){ try { const d = JSON.parse(localStorage.getItem(NORD_LS)||'null'); return (d && Array.isArray(d) && d.length) ? d : NORD_DEFAULTS.map(x=>({...x})); } catch(e){ return NORD_DEFAULTS.map(x=>({...x})); } }
 function nordSaveLocal(){ try { localStorage.setItem(NORD_LS, JSON.stringify(nordParts)); } catch(e){} }
@@ -2822,7 +2822,12 @@ let nordActive = nordParts[0] ? nordParts[0].id : null;
 function nordGet(id){ return nordParts.find(x=>x.id===id); }
 function evalNordFormula(formula, D, t){
   if(!formula) return NaN;
-  let expr = String(formula).replace(/D/g, '(' + D + ')').replace(/t/g, '(' + t + ')').replace(/,/g, '.');
+  let expr = String(formula)
+    .replace(/π/g, '(3.14)')
+    .replace(/pi/g, '(3.14)')
+    .replace(/D/g, '(' + D + ')')
+    .replace(/t/g, '(' + t + ')')
+    .replace(/,/g, '.');
   if(!/^[0-9+\-*/().\s]+$/.test(expr)) return NaN;
   try { return Function('return (' + expr + ');')(); } catch(e){ return NaN; }
 }
@@ -2871,6 +2876,8 @@ function calcNord(){
   el.innerHTML = '<div class="res-summary orange"><div class="lbl">' + p.name + '</div><div class="val">' + (ok ? r.toFixed(1) + ' mm' : 'فرمول نامعتبر') + '</div><div class="unit">' + p.formula + ' · D=' + p.d + ' · t=' + p.t + '</div></div>';
 }
 function nordDelete(id){
+  const p = nordGet(id);
+  if(!confirm('آیا مطمئن هستید که «' + (p ? p.name : 'این قطعه') + '» حذف شود؟')) return;
   nordParts = nordParts.filter(x=>x.id!==id);
   nordActive = nordParts[0] ? nordParts[0].id : null;
   renderNordSelects(); renderNordInputs(); renderNordEditForm(); calcNord();
