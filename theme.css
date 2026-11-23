@@ -39,3 +39,9 @@ html[data-caspian-theme="light"] {
   --u-text:#1a2332; --u-text-mid:#4a5568; --u-text-dim:#7a8699;
   --shadow:0 2px 8px rgba(0,0,0,.08); --shadow-hover:0 4px 16px rgba(0,0,0,.12);
 }
+
+/* ===== بهینه‌سازی کارایی (کاهش مصرف CPU) ===== */
+*, *::before, *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

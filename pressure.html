@@ -681,6 +681,8 @@ input[type=range]::-webkit-slider-thumb{
 .tab.active{color:#1a1205;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-color:transparent;box-shadow:0 4px 14px var(--accent-glow);}
 /* ریسپانسیو: روی دسکتاپ عریض‌تر */
 @media(min-width:1400px){header,main,.tabs,.footnote{max-width:1600px;}}
+/* کاهش CPU: حذف background-attachment:fixed سنگین */
+body{background-attachment:scroll !important;}
 </style>
 <script src="bridge.js"></script>
 </head>
@@ -709,6 +711,7 @@ input[type=range]::-webkit-slider-thumb{
     <button class="tab active" data-tab="t1">📦 حجم</button>
     <button class="tab" data-tab="t2">📐 ابعاد و حجم</button>
     <button class="tab" data-tab="t3">📄 ورق</button>
+    <button class="tab" data-tab="t15">🔩 نورد قطعات</button>
     <button class="tab" data-tab="t4">⚖️ وزن‌دهی</button>
     <button class="tab" data-tab="t5">💰 قیمت‌گذاری</button>
     <button class="tab" data-tab="t6">🔵 عدسی</button>
@@ -848,6 +851,45 @@ input[type=range]::-webkit-slider-thumb{
     <button class="btn blue" onclick="compareFourScenarios()" style="margin-top:8px">مقایسه ۴ سناریو</button>
     <div id="s-res"></div>
     <div id="cs-res"></div>
+  </div>
+</div>
+
+<!-- ============ تب نورد قطعات ============ -->
+<div id="t15" class="panel">
+  <div class="card orange">
+    <h2>🔩 نورد قطعات</h2>
+    <div class="info-box orange" style="margin-bottom:14px">
+      محاسبهٔ قطر نورد قطعات بر اساس فرمول. فرمول‌ها قابل ویرایش و ذخیرهٔ مشترک (Cloud) هستند. متغیرها: <b>D</b> = قطر مرجع و <b>t</b> = ضخامت.
+    </div>
+    <div class="row">
+      <div class="field"><label>ضخامت ورق t (mm)</label><input type="number" id="nord-t" value="6" step="0.1"></div>
+      <div class="field"><label>قطر شبکه D (mm)</label><input type="number" id="nord-D" value="1400" step="1"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>قطر کوره روی شبکه (mm)</label><input type="number" id="nord-Df" value="1200" step="1"></div>
+      <div class="field"><label>قطر داخلی چمبر (mm)</label><input type="number" id="nord-Di" value="1300" step="1"></div>
+    </div>
+    <button class="btn" onclick="calcNord()">⚙️ محاسبه نورد</button>
+    <div id="nord-res"></div>
+
+    <div class="section-title">📐 فرمول‌ها (قابل ویرایش)</div>
+    <div id="nord-formulas"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn blue" onclick="saveNord()">💾 ذخیرهٔ فرمول‌ها (Cloud)</button>
+      <button class="btn gray" onclick="syncNordFromCloud()" style="margin-top:0">📥 دریافت از Cloud</button>
+    </div>
+    <div id="nord-status"></div>
+
+    <div class="section-title">➕ قطعهٔ سفارشی</div>
+    <div class="info-box orange" style="margin-bottom:10px">
+      نام و فرمول قطعه را وارد کنید (متغیرها: <b>D</b> قطر و <b>t</b> ضخامت). مثال: <b>D + 2*t + 10</b>. برای همهٔ کاربران ذخیره می‌شود.
+    </div>
+    <div class="row">
+      <div class="field"><label>نام قطعه</label><input type="text" id="nord-custom-name" placeholder="مثلاً عدسی"></div>
+      <div class="field"><label>فرمول</label><input type="text" id="nord-custom-formula" placeholder="مثلاً D + 2*t + 10"></div>
+    </div>
+    <button class="btn green" onclick="addNordCustom()">➕ افزودن قطعه</button>
+    <div id="nord-custom-list"></div>
   </div>
 </div>
 
