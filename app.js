@@ -2831,27 +2831,36 @@ function nordStatus(msg, cls){
   const m = { ok:'info-box green', err:'info-box red', info:'info-box', warn:'info-box orange' };
   el.innerHTML = '<div class="' + (m[cls]||m.info) + '">' + msg + '</div>';
 }
-function renderNordList(){
-  const el = document.getElementById('nord-list'); if(!el) return;
-  el.innerHTML = nordParts.map(p => '<button type="button" class="mode-tab' + (p.id===nordActive?' active':'') + '" onclick="nordSelect(\'' + p.id + '\')">' + p.name + '</button>').join('');
+function renderNordSelects(){
+  const opts = nordParts.map(p => '<option value="' + p.id + '">' + p.name + '</option>').join('');
+  const s1 = document.getElementById('nord-select'); if(s1) s1.innerHTML = opts;
+  const s2 = document.getElementById('nord-edit-select'); if(s2) s2.innerHTML = opts;
+  if(s1 && nordActive) s1.value = nordActive;
+  if(s2 && nordActive) s2.value = nordActive;
 }
-function nordSelect(id){ nordActive = id; renderNordList(); renderNordEditor(); }
-function renderNordEditor(){
-  const el = document.getElementById('nord-editor'); if(!el) return;
+function nordSelect(id){ nordActive = id; renderNordInputs(); calcNord(); }
+function nordEditSelect(id){ nordActive = id; renderNordEditForm(); }
+function renderNordInputs(){
+  const el = document.getElementById('nord-inputs'); if(!el) return;
   const p = nordGet(nordActive);
-  if(!p){ el.innerHTML = '<div class="empty-state">قطعه‌ای نیست. یک قطعهٔ جدید اضافه کنید.</div>'; document.getElementById('nord-res').innerHTML=''; return; }
+  if(!p){ el.innerHTML=''; return; }
   el.innerHTML =
     '<div class="row2">'
-    + '<div class="fld"><label>نام قطعه</label><input type="text" value="' + p.name + '" onchange="nordGet(\'' + p.id + '\').name=this.value;renderNordList()"></div>'
+    + '<div class="fld"><label>' + p.dLabel + '</label><input type="number" id="nord-d-in" value="' + p.d + '" step="1" oninput="nordGet(\'' + p.id + '\').d=parseFloat(this.value)||0"></div>'
+    + '<div class="fld"><label>ضخامت t (mm)</label><input type="number" id="nord-t-in" value="' + p.t + '" step="0.1" oninput="nordGet(\'' + p.id + '\').t=parseFloat(this.value)||0"></div>'
+    + '</div>';
+}
+function renderNordEditForm(){
+  const el = document.getElementById('nord-edit-form'); if(!el) return;
+  const p = nordGet(nordActive);
+  if(!p){ el.innerHTML=''; return; }
+  el.innerHTML =
+    '<div class="row2">'
+    + '<div class="fld"><label>نام قطعه</label><input type="text" value="' + p.name + '" onchange="nordGet(\'' + p.id + '\').name=this.value;renderNordSelects()"></div>'
     + '<div class="fld"><label>فرمول (D و t)</label><input type="text" value="' + p.formula + '" onchange="nordGet(\'' + p.id + '\').formula=this.value;calcNord()"></div>'
     + '</div>'
-    + '<div class="row3">'
-    + '<div class="fld"><label>' + p.dLabel + '</label><input type="number" value="' + p.d + '" step="1" oninput="nordGet(\'' + p.id + '\').d=parseFloat(this.value)||0;calcNord()"></div>'
-    + '<div class="fld"><label>ضخامت t (mm)</label><input type="number" value="' + p.t + '" step="0.1" oninput="nordGet(\'' + p.id + '\').t=parseFloat(this.value)||0;calcNord()"></div>'
-    + '<div class="fld"><label>برچسب قطر</label><input type="text" value="' + p.dLabel + '" onchange="nordGet(\'' + p.id + '\').dLabel=this.value;renderNordEditor()"></div>'
-    + '</div>'
+    + '<div class="fld"><label>برچسب قطر</label><input type="text" value="' + p.dLabel + '" onchange="nordGet(\'' + p.id + '\').dLabel=this.value;renderNordInputs()"></div>'
     + '<button class="btn red small" onclick="nordDelete(\'' + p.id + '\')" style="margin-top:6px">🗑 حذف این قطعه</button>';
-  calcNord();
 }
 function calcNord(){
   const p = nordGet(nordActive);
@@ -2864,7 +2873,7 @@ function calcNord(){
 function nordDelete(id){
   nordParts = nordParts.filter(x=>x.id!==id);
   nordActive = nordParts[0] ? nordParts[0].id : null;
-  renderNordList(); renderNordEditor();
+  renderNordSelects(); renderNordInputs(); renderNordEditForm(); calcNord();
 }
 function addNordCustom(){
   const name = (document.getElementById('nord-custom-name').value || '').trim();
@@ -2877,8 +2886,8 @@ function addNordCustom(){
   document.getElementById('nord-custom-name').value = '';
   document.getElementById('nord-custom-formula').value = '';
   document.getElementById('nord-custom-dlabel').value = '';
-  nordActive = id; renderNordList(); renderNordEditor(); nordSaveLocal();
-  nordStatus('قطعهٔ «' + name + '» اضافه شد (محلی). برای اشتراک، «ذخیرهٔ قطعات» را بزنید.', 'ok');
+  nordActive = id; renderNordSelects(); renderNordInputs(); renderNordEditForm(); calcNord(); nordSaveLocal();
+  nordStatus('قطعهٔ «' + name + '» اضافه شد (محلی). برای اشتراک، «ذخیره» را بزنید.', 'ok');
 }
 async function saveNord(){
   nordSaveLocal();
@@ -2887,7 +2896,7 @@ async function saveNord(){
   if(typeof firebaseDB !== 'undefined' && firebaseDB && window.FB){
     try { const { ref, set } = window.FB; await set(ref(firebaseDB, 'rolling'), nordParts); cloud = true; } catch(e){}
   }
-  nordStatus(cloud ? '✅ در Cloud ذخیره شد (برای همهٔ کاربران).' : '💾 محلی ذخیره شد (Cloud در دسترس نبود — اینترنت یا Firebase).', cloud ? 'ok' : 'warn');
+  nordStatus(cloud ? '✅ در Cloud ذخیره شد (برای همهٔ کاربران).' : '💾 محلی ذخیره شد (Cloud در دسترس نبود).', cloud ? 'ok' : 'warn');
 }
 async function syncNordFromCloud(){
   if(typeof firebaseDB === 'undefined' || !firebaseDB || !window.FB){ nordStatus('Cloud در دسترس نیست.', 'err'); return; }
@@ -2897,20 +2906,21 @@ async function syncNordFromCloud(){
     if(s.exists() && Array.isArray(s.val())){
       nordParts = s.val();
       nordActive = nordParts[0] ? nordParts[0].id : null;
-      nordSaveLocal(); renderNordList(); renderNordEditor();
+      nordSaveLocal(); renderNordSelects(); renderNordInputs(); renderNordEditForm(); calcNord();
       nordStatus('از Cloud دریافت شد.', 'ok');
     } else { nordStatus('داده‌ای در Cloud نیست.', 'info'); }
   } catch(e){ nordStatus('خطا در دریافت از Cloud.', 'err'); }
 }
 window.calcNord = calcNord;
 window.nordSelect = nordSelect;
+window.nordEditSelect = nordEditSelect;
 window.nordDelete = nordDelete;
 window.nordGet = nordGet;
 window.saveNord = saveNord;
 window.syncNordFromCloud = syncNordFromCloud;
 window.addNordCustom = addNordCustom;
-window.renderNordList = renderNordList;
-window.renderNordEditor = renderNordEditor;
 
-renderNordList();
-renderNordEditor();
+renderNordSelects();
+renderNordInputs();
+renderNordEditForm();
+calcNord();

@@ -858,25 +858,34 @@ body{background-attachment:scroll !important;}
 <div id="t15" class="panel">
   <div class="card orange">
     <h2>🔩 نورد قطعات</h2>
-    <div class="info-box orange" style="margin-bottom:14px">
-      هر قطعه جدا و انتخابی است؛ فرمول، قطر و ضخامت هر کدام مستقل و قابل ویرایش است. متغیرها: <b>D</b> = قطر و <b>t</b> = ضخامت. با «ذخیره» برای همهٔ کاربران (Cloud) ذخیره می‌شود.
+    <div class="info-box orange" style="margin-bottom:14px">قطعه را از منو انتخاب کنید، قطر و ضخامت بدهید و محاسبه کنید. فرمول‌ها از بخش «ویرایش فرمول‌ها» قابل تغییرند. متغیرها: <b>D</b> = قطر و <b>t</b> = ضخامت.</div>
+
+    <div class="field"><label>انتخاب قطعه</label>
+      <select id="nord-select" onchange="nordSelect(this.value)"></select>
     </div>
-    <div class="mode-tabs" id="nord-list"></div>
-    <div id="nord-editor"></div>
+    <div id="nord-inputs"></div>
+    <button class="btn" onclick="calcNord()">⚙️ محاسبه</button>
     <div id="nord-res"></div>
-    <div class="row" style="margin-top:10px">
-      <button class="btn blue" onclick="saveNord()">💾 ذخیرهٔ قطعات (Cloud)</button>
-      <button class="btn gray" onclick="syncNordFromCloud()" style="margin-top:0">📥 دریافت از Cloud</button>
+
+    <div class="section-title">✏️ ویرایش فرمول‌ها</div>
+    <div class="field"><label>قطعهٔ موردنظر</label>
+      <select id="nord-edit-select" onchange="nordEditSelect(this.value)"></select>
     </div>
-    <div id="nord-status"></div>
+    <div id="nord-edit-form"></div>
 
     <div class="section-title">➕ قطعهٔ جدید</div>
     <div class="row">
       <div class="field"><label>نام قطعه</label><input type="text" id="nord-custom-name" placeholder="مثلاً عدسی"></div>
       <div class="field"><label>فرمول (D و t)</label><input type="text" id="nord-custom-formula" placeholder="مثلاً D + 2*t + 10"></div>
     </div>
-    <div class="field"><label>برچسب قطر (اختیاری)</label><input type="text" id="nord-custom-dlabel" placeholder="مثلاً قطر داخلی"></div>
+    <div class="field"><label>برچسب قطر</label><input type="text" id="nord-custom-dlabel" placeholder="مثلاً قطر داخلی"></div>
     <button class="btn green" onclick="addNordCustom()">➕ افزودن قطعه</button>
+
+    <div class="row" style="margin-top:10px">
+      <button class="btn blue" onclick="saveNord()">💾 ذخیره (Cloud)</button>
+      <button class="btn gray" onclick="syncNordFromCloud()" style="margin-top:0">📥 دریافت از Cloud</button>
+    </div>
+    <div id="nord-status"></div>
   </div>
 </div>
 
