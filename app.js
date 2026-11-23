@@ -2806,22 +2806,20 @@ window.rotate3D = rotate3D;
 window.calcRealHead = calcRealHead;
 
 /* ============================================================
-   نورد قطعات — محاسبه و ذخیرهٔ فرمول‌ها (Cloud اشتراکی)
+   نورد قطعات — هر قطعه جدا/انتخابی + فرمول قابل ویرایش + Cloud
    ============================================================ */
 const NORD_LS = 'csp_nord';
 const NORD_DEFAULTS = [
-  { id:'shell', name:'نورد پوسته', dKey:'nord-D', formula:'D + t + 4' },
-  { id:'furnace', name:'نورد کوره', dKey:'nord-Df', formula:'D - t - 4' },
-  { id:'chamber', name:'نورد چمبر', dKey:'nord-Di', formula:'D + t + 4' },
-  { id:'access', name:'نورد اکسس', dKey:'nord-D', formula:'D - 4 - t' }
+  { id:'shell', name:'نورد پوسته', dLabel:'قطر شبکه (mm)', d:1400, t:6, formula:'D + t + 4' },
+  { id:'furnace', name:'نورد کوره', dLabel:'قطر کوره روی شبکه (mm)', d:1200, t:6, formula:'D - t - 4' },
+  { id:'chamber', name:'نورد چمبر', dLabel:'قطر داخلی (mm)', d:1300, t:6, formula:'D + t + 4' },
+  { id:'access', name:'نورد اکسس', dLabel:'قطر شبکه (mm)', d:1400, t:6, formula:'D - 4 - t' }
 ];
-function nordLoadLocal(){ try { const d = JSON.parse(localStorage.getItem(NORD_LS)||'null'); return (d && d.formulas) ? d : {formulas:NORD_DEFAULTS.map(x=>({...x})), custom:[]}; } catch(e){ return {formulas:NORD_DEFAULTS.map(x=>({...x})), custom:[]}; } }
-function nordSaveLocal(){ try { localStorage.setItem(NORD_LS, JSON.stringify({formulas:nordFormulas, custom:nordCustom})); } catch(e){} }
-let _nord = nordLoadLocal();
-let nordFormulas = _nord.formulas;
-let nordCustom = _nord.custom || [];
-
-function nordVal(id){ return parseFloat(document.getElementById(id).value)||0; }
+function nordLoadLocal(){ try { const d = JSON.parse(localStorage.getItem(NORD_LS)||'null'); return (d && Array.isArray(d) && d.length) ? d : NORD_DEFAULTS.map(x=>({...x})); } catch(e){ return NORD_DEFAULTS.map(x=>({...x})); } }
+function nordSaveLocal(){ try { localStorage.setItem(NORD_LS, JSON.stringify(nordParts)); } catch(e){} }
+let nordParts = nordLoadLocal();
+let nordActive = nordParts[0] ? nordParts[0].id : null;
+function nordGet(id){ return nordParts.find(x=>x.id===id); }
 function evalNordFormula(formula, D, t){
   if(!formula) return NaN;
   let expr = String(formula).replace(/D/g, '(' + D + ')').replace(/t/g, '(' + t + ')').replace(/,/g, '.');
@@ -2830,66 +2828,64 @@ function evalNordFormula(formula, D, t){
 }
 function nordStatus(msg, cls){
   const el = document.getElementById('nord-status'); if(!el) return;
-  const clsMap = { ok:'info-box green', err:'info-box red', info:'info-box', warn:'info-box orange' };
-  el.innerHTML = '<div class="' + (clsMap[cls]||clsMap.info) + '">' + msg + '</div>';
+  const m = { ok:'info-box green', err:'info-box red', info:'info-box', warn:'info-box orange' };
+  el.innerHTML = '<div class="' + (m[cls]||m.info) + '">' + msg + '</div>';
+}
+function renderNordList(){
+  const el = document.getElementById('nord-list'); if(!el) return;
+  el.innerHTML = nordParts.map(p => '<button type="button" class="mode-tab' + (p.id===nordActive?' active':'') + '" onclick="nordSelect(\'' + p.id + '\')">' + p.name + '</button>').join('');
+}
+function nordSelect(id){ nordActive = id; renderNordList(); renderNordEditor(); }
+function renderNordEditor(){
+  const el = document.getElementById('nord-editor'); if(!el) return;
+  const p = nordGet(nordActive);
+  if(!p){ el.innerHTML = '<div class="empty-state">قطعه‌ای نیست. یک قطعهٔ جدید اضافه کنید.</div>'; document.getElementById('nord-res').innerHTML=''; return; }
+  el.innerHTML =
+    '<div class="row2">'
+    + '<div class="fld"><label>نام قطعه</label><input type="text" value="' + p.name + '" onchange="nordGet(\'' + p.id + '\').name=this.value;renderNordList()"></div>'
+    + '<div class="fld"><label>فرمول (D و t)</label><input type="text" value="' + p.formula + '" onchange="nordGet(\'' + p.id + '\').formula=this.value;calcNord()"></div>'
+    + '</div>'
+    + '<div class="row3">'
+    + '<div class="fld"><label>' + p.dLabel + '</label><input type="number" value="' + p.d + '" step="1" oninput="nordGet(\'' + p.id + '\').d=parseFloat(this.value)||0;calcNord()"></div>'
+    + '<div class="fld"><label>ضخامت t (mm)</label><input type="number" value="' + p.t + '" step="0.1" oninput="nordGet(\'' + p.id + '\').t=parseFloat(this.value)||0;calcNord()"></div>'
+    + '<div class="fld"><label>برچسب قطر</label><input type="text" value="' + p.dLabel + '" onchange="nordGet(\'' + p.id + '\').dLabel=this.value;renderNordEditor()"></div>'
+    + '</div>'
+    + '<button class="btn red small" onclick="nordDelete(\'' + p.id + '\')" style="margin-top:6px">🗑 حذف این قطعه</button>';
+  calcNord();
 }
 function calcNord(){
-  const t = nordVal('nord-t'), D = nordVal('nord-D'), Df = nordVal('nord-Df'), Di = nordVal('nord-Di');
-  if(t <= 0){ document.getElementById('nord-res').innerHTML = '<div class="info-box red">ضخامت ورق را وارد کنید.</div>'; return; }
-  const diamMap = { 'nord-D': D, 'nord-Df': Df, 'nord-Di': Di };
-  let rows = '';
-  nordFormulas.forEach(p => {
-    const d = diamMap[p.dKey] != null ? diamMap[p.dKey] : D;
-    const r = evalNordFormula(p.formula, d, t);
-    const ok = isFinite(r);
-    rows += '<div class="res-row big"><span class="lbl">' + p.name + '</span><span class="val" style="color:' + (ok ? 'var(--accent-2)' : 'var(--err-2)') + '">' + (ok ? r.toFixed(1) + ' mm' : 'فرمول نامعتبر') + '</span></div>';
-  });
-  document.getElementById('nord-res').innerHTML = '<div class="res-summary orange" style="margin-top:12px"><div class="lbl">قطر نورد قطعات</div><div class="val" style="font-size:26px">t = ' + t + ' mm</div></div>' + rows;
+  const p = nordGet(nordActive);
+  const el = document.getElementById('nord-res'); if(!el) return;
+  if(!p){ el.innerHTML = ''; return; }
+  const r = evalNordFormula(p.formula, p.d, p.t);
+  const ok = isFinite(r);
+  el.innerHTML = '<div class="res-summary orange"><div class="lbl">' + p.name + '</div><div class="val">' + (ok ? r.toFixed(1) + ' mm' : 'فرمول نامعتبر') + '</div><div class="unit">' + p.formula + ' · D=' + p.d + ' · t=' + p.t + '</div></div>';
 }
-function renderNordFormulas(){
-  const el = document.getElementById('nord-formulas'); if(!el) return;
-  let html = '';
-  nordFormulas.forEach((p, i) => {
-    html += '<div class="eq-select" style="margin-bottom:8px">'
-      + '<div class="row2">'
-      + '<div class="fld"><label>نام قطعه</label><input type="text" value="' + p.name + '" onchange="nordFormulas[' + i + '].name=this.value"></div>'
-      + '<div class="fld"><label>فرمول (D و t)</label><input type="text" value="' + p.formula + '" onchange="nordFormulas[' + i + '].formula=this.value"></div>'
-      + '</div>'
-      + '<div class="fld"><label>قطر مرجع</label><select onchange="nordFormulas[' + i + '].dKey=this.value">'
-      + '<option value="nord-D"' + (p.dKey === 'nord-D' ? ' selected' : '') + '>قطر شبکه</option>'
-      + '<option value="nord-Df"' + (p.dKey === 'nord-Df' ? ' selected' : '') + '>قطر کوره روی شبکه</option>'
-      + '<option value="nord-Di"' + (p.dKey === 'nord-Di' ? ' selected' : '') + '>قطر داخلی چمبر</option>'
-      + '</select></div>'
-      + '<button class="btn red small" onclick="nordFormulas.splice(' + i + ',1);renderNordFormulas();" style="margin-top:6px">🗑 حذف</button>'
-      + '</div>';
-  });
-  el.innerHTML = html || '<div class="empty-state">فرمولی ثبت نشده است.</div>';
-}
-function renderNordCustomList(){
-  const el = document.getElementById('nord-custom-list'); if(!el) return;
-  if(nordCustom.length === 0){ el.innerHTML = '<div class="empty-state">قطعهٔ سفارشی ثبت نشده است.</div>'; return; }
-  el.innerHTML = nordCustom.map((p, i) =>
-    '<div class="eq-select" style="display:flex;align-items:center;gap:10px"><div style="flex:1"><b>' + p.name + '</b><br><span class="fld-hint">' + p.formula + '</span></div>'
-    + '<button class="btn red small" onclick="nordCustom.splice(' + i + ',1);renderNordCustomList();nordSaveLocal();" style="width:auto;margin:0">🗑</button></div>'
-  ).join('');
+function nordDelete(id){
+  nordParts = nordParts.filter(x=>x.id!==id);
+  nordActive = nordParts[0] ? nordParts[0].id : null;
+  renderNordList(); renderNordEditor();
 }
 function addNordCustom(){
   const name = (document.getElementById('nord-custom-name').value || '').trim();
   const formula = (document.getElementById('nord-custom-formula').value || '').trim();
+  const dLabel = (document.getElementById('nord-custom-dlabel').value || '').trim() || 'قطر (mm)';
   if(!name || !formula){ nordStatus('نام و فرمول را وارد کنید.', 'err'); return; }
   if(!isFinite(evalNordFormula(formula, 1000, 6))){ nordStatus('فرمول نامعتبر است (فقط D، t، اعداد و + - * / ).', 'err'); return; }
-  nordCustom.push({ name: name, formula: formula, dKey: 'nord-D' });
+  const id = 'c' + Date.now();
+  nordParts.push({ id: id, name: name, dLabel: dLabel, d: 1000, t: 6, formula: formula });
   document.getElementById('nord-custom-name').value = '';
   document.getElementById('nord-custom-formula').value = '';
-  renderNordCustomList(); nordSaveLocal();
-  nordStatus('قطعهٔ سفارشی ذخیره شد (محلی). برای اشتراک، «ذخیرهٔ فرمول‌ها» را بزنید.', 'ok');
+  document.getElementById('nord-custom-dlabel').value = '';
+  nordActive = id; renderNordList(); renderNordEditor(); nordSaveLocal();
+  nordStatus('قطعهٔ «' + name + '» اضافه شد (محلی). برای اشتراک، «ذخیرهٔ قطعات» را بزنید.', 'ok');
 }
 async function saveNord(){
   nordSaveLocal();
   nordStatus('در حال ذخیره…', 'info');
   let cloud = false;
   if(typeof firebaseDB !== 'undefined' && firebaseDB && window.FB){
-    try { const { ref, set } = window.FB; await set(ref(firebaseDB, 'rolling'), { formulas: nordFormulas, custom: nordCustom }); cloud = true; } catch(e){}
+    try { const { ref, set } = window.FB; await set(ref(firebaseDB, 'rolling'), nordParts); cloud = true; } catch(e){}
   }
   nordStatus(cloud ? '✅ در Cloud ذخیره شد (برای همهٔ کاربران).' : '💾 محلی ذخیره شد (Cloud در دسترس نبود — اینترنت یا Firebase).', cloud ? 'ok' : 'warn');
 }
@@ -2898,21 +2894,23 @@ async function syncNordFromCloud(){
   try {
     const { ref, get } = window.FB;
     const s = await get(ref(firebaseDB, 'rolling'));
-    if(s.exists()){
-      const d = s.val();
-      if(d.formulas) nordFormulas = d.formulas;
-      if(d.custom) nordCustom = d.custom;
-      nordSaveLocal(); renderNordFormulas(); renderNordCustomList(); calcNord();
+    if(s.exists() && Array.isArray(s.val())){
+      nordParts = s.val();
+      nordActive = nordParts[0] ? nordParts[0].id : null;
+      nordSaveLocal(); renderNordList(); renderNordEditor();
       nordStatus('از Cloud دریافت شد.', 'ok');
     } else { nordStatus('داده‌ای در Cloud نیست.', 'info'); }
   } catch(e){ nordStatus('خطا در دریافت از Cloud.', 'err'); }
 }
 window.calcNord = calcNord;
+window.nordSelect = nordSelect;
+window.nordDelete = nordDelete;
+window.nordGet = nordGet;
 window.saveNord = saveNord;
 window.syncNordFromCloud = syncNordFromCloud;
 window.addNordCustom = addNordCustom;
-window.renderNordFormulas = renderNordFormulas;
-window.renderNordCustomList = renderNordCustomList;
+window.renderNordList = renderNordList;
+window.renderNordEditor = renderNordEditor;
 
-renderNordFormulas();
-renderNordCustomList();
+renderNordList();
+renderNordEditor();
