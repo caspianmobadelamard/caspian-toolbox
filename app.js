@@ -2808,12 +2808,12 @@ window.calcRealHead = calcRealHead;
 /* ============================================================
    نورد قطعات — هر قطعه جدا/انتخابی + فرمول قابل ویرایش + Cloud
    ============================================================ */
-const NORD_LS = 'csp_nord';
+const NORD_LS = 'csp_nord_v2';
 const NORD_DEFAULTS = [
-  { id:'shell', name:'نورد پوسته', dLabel:'قطر شبکه (mm)', d:1400, t:6, formula:'(D + t + 4) * 3.14' },
-  { id:'furnace', name:'نورد کوره', dLabel:'قطر کوره روی شبکه (mm)', d:1200, t:6, formula:'(D - t - 4) * 3.14' },
-  { id:'chamber', name:'نورد چمبر', dLabel:'قطر داخلی (mm)', d:1300, t:6, formula:'(D + t + 4) * 3.14' },
-  { id:'access', name:'نورد اکسس', dLabel:'قطر شبکه (mm)', d:1400, t:6, formula:'(D - 4 - t) * 3.14' }
+  { id:'shell', name:'نورد پوسته', dLabel:'قطر شبکه (mm)', d:1400, t:6, formula:'(D + t + 4) * π' },
+  { id:'furnace', name:'نورد کوره', dLabel:'قطر کوره روی شبکه (mm)', d:1200, t:6, formula:'(D - t - 4) * π' },
+  { id:'chamber', name:'نورد چمبر', dLabel:'قطر داخلی (mm)', d:1300, t:6, formula:'(D + t + 4) * π' },
+  { id:'access', name:'نورد اکسس', dLabel:'قطر شبکه (mm)', d:1400, t:6, formula:'(D - 4 - t) * π' }
 ];
 function nordLoadLocal(){ try { const d = JSON.parse(localStorage.getItem(NORD_LS)||'null'); return (d && Array.isArray(d) && d.length) ? d : NORD_DEFAULTS.map(x=>({...x})); } catch(e){ return NORD_DEFAULTS.map(x=>({...x})); } }
 function nordSaveLocal(){ try { localStorage.setItem(NORD_LS, JSON.stringify(nordParts)); } catch(e){} }
@@ -2823,8 +2823,8 @@ function nordGet(id){ return nordParts.find(x=>x.id===id); }
 function evalNordFormula(formula, D, t){
   if(!formula) return NaN;
   let expr = String(formula)
-    .replace(/π/g, '(3.14)')
-    .replace(/pi/g, '(3.14)')
+    .replace(/π/g, '(' + Math.PI + ')')
+    .replace(/pi/g, '(' + Math.PI + ')')
     .replace(/D/g, '(' + D + ')')
     .replace(/t/g, '(' + t + ')')
     .replace(/,/g, '.');
